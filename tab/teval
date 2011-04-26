@@ -10,6 +10,7 @@ Uses the python eval() function, or bc if specified
 # 08.16.2010	Ihms	added ability to calculate via eval()
 # 08.18.2010	Ihms	added coefficients
 # 04.26.2010	EI		changed name to teval, added some help info
+version='04.26.2010'
 
 #
 # imports
@@ -86,6 +87,8 @@ Flags:
     -y                  Output only the expression's output (e.g. y) values.
 
     -v                  Be verbose.
+    
+    -version			Show the current version and exit.
 """
 	
 def showIfVerbose(s):
@@ -141,6 +144,9 @@ for i in range(0, len(sys.argv)):
 		y_only = True
 	elif (sys.argv[i] == '-v'):
 		verbose = True
+	elif (sys.argv[i] == '-version'):
+		print version
+		exit()
 	elif ((sys.argv == '-h') or (sys.argv == '-help')):
 		showHelp()
 

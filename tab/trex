@@ -4,6 +4,7 @@
 
 # Changelog:
 # 07.29.2010:	written
+$version='07.29.2010';
 
 # default values
 $argcounter			= 0;
@@ -56,6 +57,10 @@ while ( $argcounter <= $#ARGV )
 	}
 	elsif ( $ARGV[ $argcounter ] eq "-comma" ){
 		$delimiter_regex = qr/\,/;
+	}
+	elsif ($ARGV[ $argcounter ] eq "-version"){
+		print $version."\n";
+		exit;
 	}
 	elsif ($ARGV[ $argcounter ] eq "-h"){
 		show_help();

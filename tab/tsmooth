@@ -6,6 +6,7 @@
 # 05.14.2009	written
 # 01.27.2010	added help
 # 05.18.2010	added pipe checking
+$version='05.18.2010';
 
 # default values
 $argcounter			= 0;
@@ -33,6 +34,10 @@ while ( $argcounter <= $#ARGV )
 		$mode = "sg";
 		$filter_width = $ARGV[ $argcounter +1 ];
 		$argcounter++;
+	}
+	elsif ($ARGV[ $argcounter ] eq "-version"){
+		print $version."\n";
+		exit;
 	}
 	elsif ($ARGV[ $argcounter ] eq "-h"){
 		show_help();

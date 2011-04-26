@@ -4,6 +4,7 @@
 
 # Changelog:
 # 004.25.11	EI	written
+$version='04.25.11';
 
 # default values
 $argcounter			= 0;
@@ -26,6 +27,10 @@ while ( $argcounter <= $#ARGV )
 	}
 	elsif ( $ARGV[ $argcounter ] eq "-comma" ){
 		$delimiter_regex = qr/\,/;
+	}
+	elsif ($ARGV[ $argcounter ] eq "-version"){
+		print $version."\n";
+		exit;
 	}
 	elsif ($ARGV[ $argcounter ] eq "-h"){
 		show_help();

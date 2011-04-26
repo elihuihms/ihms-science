@@ -7,6 +7,7 @@
 # 01.27.2010	fixed minimization function, added help
 # 03.10.2010	fixed to deal with negative numbers in log mode
 # 04.06.2011	added verbose option
+$version='04.06.2011';
 
 # This script multiplies a file containing a single column of data by a series of constants, then
 # calculates the chi squared against a second row. It then reports the factor that generates the 
@@ -63,6 +64,10 @@ while ( $argcounter <= $#ARGV )
 	}
 	elsif ( $ARGV[ $argcounter ] eq "-v" ){
 		$verbose = "true";
+	}
+	elsif ($ARGV[ $argcounter ] eq "-version"){
+		print $version."\n";
+		exit;
 	}
 	elsif ($ARGV[ $argcounter ] eq "-h"){
 		show_help();

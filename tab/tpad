@@ -5,6 +5,7 @@
 # Changelog:
 # 07.21.2010	written
 # 08.18.2010	cleaned up a little
+$version='08.18.2010';
 
 # default values
 $argcounter			= 0;
@@ -45,6 +46,10 @@ while ( $argcounter <= $#ARGV )
 	}
 	elsif ( $ARGV[ $argcounter ] eq "-fill" ){
 		$fill = 1;
+	}
+	elsif ($ARGV[ $argcounter ] eq "-version"){
+		print $version."\n";
+		exit;
 	}
 	elsif ($ARGV[ $argcounter ] eq "-h"){
 		show_help();

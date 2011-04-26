@@ -8,6 +8,7 @@
 # 02.02.2010	added power function
 # 05.18.2010	added pipe checking
 # 08.04.2010	added sprintf and bc functions
+$version='08.04.2010';
 
 # default values
 $argcounter			= 0;
@@ -32,6 +33,10 @@ while ( $argcounter <= $#ARGV )
 			$scale = $ARGV[ $argcounter +2 ];
 		}
 		$argcounter +=2;
+	}
+	elsif ($ARGV[ $argcounter ] eq "-version"){
+		print $version."\n";
+		exit;
 	}
 	elsif ($ARGV[ $argcounter ] eq "-h"){
 		show_help();

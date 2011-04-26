@@ -7,6 +7,7 @@
 # 01.27.2010	added help
 # 07.30.2010	changed how tread outputs empty columns
 # 04.02.2010	added input from stdin
+$version='04.02.2010';
 
 # default values
 $argcounter			= 0;
@@ -53,6 +54,10 @@ while ( $argcounter <= $#ARGV )
 	}
 	elsif ( $ARGV[ $argcounter ] eq "-comma" ){
 		$delimiter_regex = qr/\,/;
+	}
+	elsif ($ARGV[ $argcounter ] eq "-version"){
+		print $version."\n";
+		exit;
 	}
 	elsif ($ARGV[ $argcounter ] eq "-h"){
 		show_help();

@@ -36,6 +36,10 @@ while ( $argcounter <= $#ARGV )
 		print $version."\n";
 		exit;
 	}
+	elsif ($ARGV[ $argcounter ] eq "-version"){
+		print $version."\n";
+		exit;
+	}
 	elsif ($ARGV[ $argcounter ] eq "-h"){
 		show_help();
 	}

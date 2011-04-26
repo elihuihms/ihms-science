@@ -1,0 +1,160 @@
+#!/usr/bin/perl
+
+#
+# Runs a given set of DAMMIN conditions a specified number of times and calculates the average if requested
+#
+
+# changelog
+# 02.01.2011 written
+# 04.13.2011	EI	Eric found bug that didn't close configuration file handle properly
+
+# default values
+$argcounter		= 0;
+$damn_exe		= 'dammin';
+$damn_conf		= 'parameters.txt';
+$num_start		= 0;
+$num_runs		= 10;
+$num_cores		= 1;
+$average		= 'false';
+$outputpipe		= " >/dev/null 2>&1";
+
+# constants
+$sleep_interval = 30; #seconds
+
+#go through the arguments and get their values
+while ( $argcounter <= $#ARGV )
+{
+	if ( $ARGV[ $argcounter ] eq "-n" )
+	{
+		$num_runs = $ARGV[ $argcounter +1 ];
+		$argcounter++;
+	}
+	elsif ( $ARGV[ $argcounter ] eq "-exe" )
+	{
+		$damn_exe = $ARGV[ $argcounter +1 ];
+		$argcounter++;
+	}
+	elsif ( $ARGV[ $argcounter ] eq "-ans" )
+	{
+		$damn_conf = $ARGV[ $argcounter +1 ];
+		$argcounter++;
+	}
+	elsif ( $ARGV[ $argcounter ] eq "-start" )
+	{
+		$num_start = $ARGV[ $argcounter +1 ];
+		$argcounter++;
+	}
+	elsif ( $ARGV[ $argcounter ] eq "-cores" )
+	{
+		$num_cores = $ARGV[ $argcounter +1 ];
+		$argcounter++;
+	}
+	elsif ($ARGV[ $argcounter ] eq "-avg"){
+		$average='true';
+	}
+	elsif ($ARGV[ $argcounter ] eq "-h"){
+		show_help();
+	}
+	elsif ($ARGV[ $argcounter ] eq "-v"){
+		$outputpipe = '';
+	}
+	
+	$argcounter++;
+}
+
+# get the example input
+open CONF, "<$damn_conf" or die("Template configuration file '$damn_conf' not found!"); 
+$conf = join('',<CONF>);
+close(CONF);
+
+# do what paltry configuration validation we can
+if(!($conf =~ m/\<N\>/)){
+	die("Configuration file template lacks <N>.");
+}
+
+# write the necessary input files
+print "Creating input files.\n";
+write_inputs($conf,$num_start,$num_runs);
+
+$input_counter = $num_start;
+while($input_counter < $num_runs)
+{
+	# spawn a new process if we have a free core 
+	if (count_procs($damn_exe)<$num_cores){
+	
+		if (! -e "$input_counter.ans"){
+			die("Could not load job configuration file '$input_counter.ans'");
+		}
+	
+		print "Spawning a new dammin process, ID# $input_counter.\n";
+		`$damn_exe < $input_counter.ans $outputpipe`;
+		$input_counter++;
+	}
+
+	# sleep while dammin does its thing...
+	sleep($sleep_interval);
+}
+
+# do we calculate an average structure using damaver?
+if ($average!='false')
+{
+	# wait until all dammin processes are finished
+	while(count_procs('dammin')>0){
+		sleep($sleep_interval);
+	}
+
+	# try and create a folder to contain the superimposed and averaged distances
+	if (-e 'damaver'){
+		die ("'damaver' folder already exists!");
+	}
+	
+	`mkdir damaver`;
+	`cd damaver`;
+	
+	# make symbolic links to the dammin outputs
+	for($i=$num_start;$i<$num_runs;$i++){
+		print "Creating symlinks.\n";
+		`ln -s "../$i-1.pdb" ./`;
+	}
+	
+	# execute the damaver suite in batch mode
+	print "Executing damaver in batch mode.\n";
+	`damsel /b /s $outputpipe`;
+	`damsup /b /s $outputpipe`;
+	`damaver /b $outputpipe`;
+	`damfilt /b $outputpipe`;
+}
+
+#
+# SUBROUTINES
+#
+
+sub count_procs
+{
+	$procname = $_[0];
+	return `ps x | grep '$procname' | grep -vc 'grep'`;
+}
+
+sub write_inputs
+{
+	$file = $_[0];
+	$start = $_[1];
+	$stop = $_[2];
+	
+	for($i=$start;$i<$stop;$i++)
+	{
+		$copy = $file;
+		$copy =~ s/\<N\>/$i/;
+
+		open(OUTPUT, ">$i.ans") or die("Can't open '$i.ans' for writing: $!");
+		print OUTPUT $copy;
+		close(OUTPUT);
+	}
+	return;
+}
+
+sub show_help
+{
+	print "damn -ans <dammin.ans> (-n=10) (-start=N) (-cores=1)\n";
+	exit;
+}

@@ -1,0 +1,179 @@
+{\rtf1\ansi\ansicpg1252\cocoartf1038\cocoasubrtf350
+{\fonttbl\f0\fnil\fcharset0 Georgia;\f1\fmodern\fcharset0 Courier;\f2\fmodern\fcharset0 Courier-Oblique;
+}
+{\colortbl;\red255\green255\blue255;}
+{\info
+{\author Elihu Ihms}
+{\*\company The Ohio State University}}\margl1440\margr1440\vieww12240\viewh15840\viewkind1
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\ql\qnatural
+
+\f0\b\fs28 \cf0 Notes for SAXS scripts
+\fs24 \
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\ql\qnatural
+
+\b0\fs20 \cf0 Last revision date: 04.15.2011\
+\
+These Perl scripts are to ease the analysis and display of SAXS data, semi-automating several time consuming components.\
+\
+Note that  these scripts rely heavily upon the "tab" suite of utilities ('tread', 'tinsert', 'tscale', etc.), as well as the plotting package xmgrace. Both the tab directory and the xmgrace executable should be present in your shell environment's $path variable. For a brief description of any script's usage and options, you may execute it alone with a sole 
+\f1 -h
+\f0  option (help).\
+\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\ql\qnatural
+
+\b\fs28 \cf0 saxsplot
+\b0\fs20 \
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\ql\qnatural
+
+\f2\i \cf0 saxsplot (-v) (-out pdf|png|etc.) [\ul file_1.dat\ulnone ]\'85[\ul file_n.dat\ulnone ] \ul output\ulnone \
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\ql\qnatural
+
+\f0\i0 \cf0 \
+saxsplot generates a standard scattering profile (i.e. log-scale) plot of one or more dat files, and saves it to the specified file. This is very useful for rapidly comparing multiple saxs scattering profiles. saxsplot assumes a tab-delimited data file, with the first column being q (2theta), and scattering intensity as the second column. Note that xmgrace will not tolerate any non-column data at the beginning of its input files. If you have comment headers at the top of any input files, xmgrace will fail with a "No block data read" error.\
+\
+Options:\
+\pard\tx720\tx2160\tx3420\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\li3420\fi-3420\sa100\ql\qnatural
+
+\i \cf0 	
+\f2 -out [pdf|png|etc.]
+\f0 	
+\i0 Specifies xmgrace output format, availability of which will vary from installation to installation. Default is PostScript.\
+
+\i 	
+\f2 [\ul input.dat\ulnone ]
+\f0 		
+\i0 Input files to plot\
+
+\i 	
+\f2 [\ul output\ulnone ]
+\f0 		
+\i0 Resulting output file, extension will be set automatically\
+
+\i 	
+\f2 -v
+\f0 		
+\i0 Verbose mode, good for identifying any xmgrace errors\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\ql\qnatural
+
+\b\fs28 \cf0 \
+gnom_rmax
+\b0\fs20 \
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\ql\qnatural
+
+\f2\i \cf0 gnom_rmax -rmax start,end,step -input [input.dat] [options]\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\ql\qnatural
+
+\f0\i0 \cf0 \
+gnom_rmax semiautomates the determination of Rmax values by generating several different plots. First is a comparison of back-calculated scattering profiles with the provided profile. A chi-square and log chi-square plots showing the goodness-of fit for the back-calculated scattering profiles to the provided  profile is also generated. Finally, an overlay of the different pairwise distribution or P(r) functions is plotted.\
+\
+Note that at times, gnom may throw an error which will cause the execution of the script to halt. If this occurs, try a different set of starting parameters. Enabling verbose mode will assist in determining any gnom or xmgrace errors.\
+\
+Options:\
+\pard\tx720\tx2160\tx3420\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\li3420\fi-3420\sa100\ql\qnatural
+
+\i \cf0 	
+\f2 -rmax start,end(,step)
+\f0\i0 	(Required) Specifies the desired starting and stopping values for the Rmax search range. If step is not specified, 10 steps total will be taken.\
+
+\i 	
+\f2 -input [\ul file\ulnone ]	
+\f0\i0 (Required) Specifies the tab-delimited experimental scattering profile to work on. This file should consist of three columns:\
+				1. q, 2theta, the scattering angle\
+				2. I(q), the scattering intensity at q\
+				3. dI(q), the intensity error\
+			NOTE: if you are starting with data that DOES NOT have an error column, you must specify the error standard deviation with the 
+\f2\i -err
+\f0\i0  option.\
+
+\i 	
+\f2 -nskip start,end
+\f0 	
+\i0 Specifies the number of starting and trailing points to discard from the provided scattering profile. Defaults to zero for each.\
+
+\i 	
+\f2 -dir [\ul dirname\ulnone ]
+\f0 	
+\i0 The directory to save the plots to, defaults to "rmax"\
+
+\i 	
+\f2 -points N
+\f0 		
+\i0 The number of points to use in the real dimension, defaults to 101\
+
+\i 	
+\f2 -fix [min|max|both]
+\f0 	
+\i0 Specifies whether P(r) should be constrained to zero at the boundary conditions. E.g. specifying "min" will require that P(0)=0, while max will require that P(Rmax)=0. Default is "both".\
+
+\i 	
+\f2 -err 0.0	
+\f0 	
+\i0 This parameter should ONLY be used if errors are not present in the provided scattering profile. If errors are not known, set to zero.\
+
+\i 	
+\f2 -keep
+\f0 		
+\i0 Determines whether or not the individual scattering profile and pairwise distribution curves for each Rmax evaluation should be retained.\
+
+\i 	
+\f2 -out [pdf|png|etc.]
+\f0 	
+\i0 Specifies xmgrace output format, availability of which will vary from installation to installation. Default is PostScript.\
+
+\i 	
+\f2 -v
+\f0 		
+\i0 Verbose mode\
+
+\f2\i \
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\ql\qnatural
+
+\f0\i0\b\fs28 \cf0 damn
+\b0\fs20 \
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\ql\qnatural
+
+\f2\i \cf0 damn -n=N -start=N -cores=N\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\ql\qnatural
+
+\f0\i0 \cf0 \
+damn automatically generates a series of dammin runs, spawning a new process as old ones finish or as processor cores become available. It will also optionally generate the final averaged envelope if desired.\
+\
+Options:\
+\pard\tx720\tx2160\tx3420\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\li3420\fi-3420\sa100\ql\qnatural
+
+\i \cf0 	
+\f2 -ans
+\f0 		
+\i0 Specifies the input parameters file piped to dammin. damn will automatically replace any occurrences of the string "<N>" in this template file with the current run number before sending to dammin. Defaults to "parameters.txt"\
+
+\i 	
+\f2 -n N
+\f0 		
+\i0 Specifies the total number of annealings to perform. Defaults to 10.\
+
+\i 	
+\f2 -start N
+\f0 		
+\i0 Specifies which run to start at, useful for restarting  a crashed attempt. Defaults to 9\
+
+\i 	
+\f2 -cores N
+\f0 		
+\i0 Specifies how many dammin processes to run at once. Modern multicored systems will typically allot a dammin process to each core at 100% utilization. It is advisable to set this number to 1 less than the total number of cores, as this will avoid any responsiveness issues.\
+
+\i 	
+\f2 -exe procname
+\f0 	
+\i0 Specifies the annealing program name to run. Defaults to "dammin".\
+
+\i 	
+\f2 -avg
+\f0 		
+\i0 Setting this option will cause damn to average (via damsel, damsup, etc.) the generated individual envelopes after execution.\
+
+\i 	
+\f2 -v
+\f0 		
+\i0 Verbose mode\
+\
+}

@@ -14,12 +14,12 @@ $damn_exe		= 'dammin';
 $damn_conf		= 'parameters.txt';
 $num_start		= 0;
 $num_runs		= 10;
-$num_cores		= 1;
+$num_procs		= 1;
 $average		= 'false';
 $outputpipe		= " >/dev/null 2>&1";
 
 # constants
-$sleep_interval = 30; #seconds
+$sleep_interval = 10; #seconds
 
 #go through the arguments and get their values
 while ( $argcounter <= $#ARGV )
@@ -46,7 +46,7 @@ while ( $argcounter <= $#ARGV )
 	}
 	elsif ( $ARGV[ $argcounter ] eq "-cores" )
 	{
-		$num_cores = $ARGV[ $argcounter +1 ];
+		$num_procs = 2*($ARGV[ $argcounter +1 ]);
 		$argcounter++;
 	}
 	elsif ($ARGV[ $argcounter ] eq "-avg"){
@@ -72,6 +72,11 @@ if(!($conf =~ m/\<N\>/)){
 	die("Configuration file template lacks <N>.");
 }
 
+# if we're not piping output away, don't have to worry about the dammn shell command in ps
+if ($outputpipe eq ''){
+	$num_procs = $num_procs/2;
+}
+
 # write the necessary input files
 print "Creating input files.\n";
 write_inputs($conf,$num_start,$num_runs);
@@ -80,7 +85,7 @@ $input_counter = $num_start;
 while($input_counter < $num_runs)
 {
 	# spawn a new process if we have a free core 
-	if (count_procs($damn_exe)<$num_cores){
+	if (count_procs($damn_exe)<$num_procs){
 	
 		if (! -e "$input_counter.ans"){
 			die("Could not load job configuration file '$input_counter.ans'");

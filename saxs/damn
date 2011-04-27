@@ -7,6 +7,8 @@
 # changelog
 # 02.01.2011 written
 # 04.13.2011	EI	Eric found bug that didn't close configuration file handle properly
+# 04.25.2011	EI	fixed proc spawning
+$version='04.27.11';
 
 # default values
 $argcounter		= 0;
@@ -16,7 +18,7 @@ $num_start		= 0;
 $num_runs		= 10;
 $num_procs		= 1;
 $average		= 'false';
-$outputpipe		= " >/dev/null 2>&1";
+$outputpipe		= " >/dev/null 2>&1 &";
 
 # constants
 $sleep_interval = 10; #seconds
@@ -46,17 +48,21 @@ while ( $argcounter <= $#ARGV )
 	}
 	elsif ( $ARGV[ $argcounter ] eq "-cores" )
 	{
-		$num_procs = 2*($ARGV[ $argcounter +1 ]);
+		$num_procs = $ARGV[ $argcounter +1 ];
 		$argcounter++;
 	}
 	elsif ($ARGV[ $argcounter ] eq "-avg"){
 		$average='true';
 	}
+	elsif ($ARGV[ $argcounter ] eq "-version"){
+		print $version."\n";
+		exit;
+	}
 	elsif ($ARGV[ $argcounter ] eq "-h"){
 		show_help();
 	}
 	elsif ($ARGV[ $argcounter ] eq "-v"){
-		$outputpipe = '';
+		$outputpipe = '&';
 	}
 	
 	$argcounter++;
@@ -70,11 +76,6 @@ close(CONF);
 # do what paltry configuration validation we can
 if(!($conf =~ m/\<N\>/)){
 	die("Configuration file template lacks <N>.");
-}
-
-# if we're not piping output away, don't have to worry about the dammn shell command in ps
-if ($outputpipe eq ''){
-	$num_procs = $num_procs/2;
 }
 
 # write the necessary input files
@@ -93,6 +94,7 @@ while($input_counter < $num_runs)
 	
 		print "Spawning a new dammin process, ID# $input_counter.\n";
 		`$damn_exe < $input_counter.ans $outputpipe`;
+
 		$input_counter++;
 	}
 

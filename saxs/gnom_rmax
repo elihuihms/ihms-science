@@ -204,7 +204,7 @@ for ($rmax=$rmax_low; $rmax<=$rmax_high; $rmax+=$rmax_step)
 		@a2 = split("\t",$lines[$i+1]);
 		$scaling_factor += ($a1[1]*($a2[0]-$a1[0]));
 	}
-	`tread -col 1 gnom_p.dat | tmath -f divide $scaling_factor | tinsert -col 1 gnom_p.dat`;
+	`tread -col 1 gnom_p.dat | tmath -f divide $scaling_factor | twrite -col 1 gnom_p.dat`;
 	
 	print RESULTS "$values\t$total_estimate\t$chisq_sum\t$chisq_ln_sum\n";
 	

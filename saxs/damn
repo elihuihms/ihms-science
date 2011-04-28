@@ -8,7 +8,8 @@
 # 02.01.2011 written
 # 04.13.2011	EI	Eric found bug that didn't close configuration file handle properly
 # 04.25.2011	EI	fixed proc spawning
-$version='04.27.11';
+# 04.28.2011	EI	fixed batch averaging
+$version='04.28.11';
 
 # default values
 $argcounter		= 0;
@@ -125,8 +126,9 @@ if ($average!='false')
 	}
 	
 	# execute the damaver suite in batch mode
-	print "Executing damaver in batch mode.\n";
-	`damsel /b /s $outputpipe`;
+	print "Executing damaver in batch averaging mode.\n";
+	`ls -1 *-1.pdb > damaver_list.txt`;
+	`damsel damaver_list.txt /s $outputpipe`;
 	`damsup /b /s $outputpipe`;
 	`damaver /b $outputpipe`;
 	`damfilt /b $outputpipe`;

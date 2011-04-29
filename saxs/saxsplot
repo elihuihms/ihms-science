@@ -83,7 +83,6 @@ if ($agr_output eq 'true'){
 }
 $s .= " -hardcopy -hdevice $output_type -printfile ".$ARGV[$#ARGV].".$output_ext $outputpipe";
 
-print $s."\n";
 `$s`;
 `rm /tmp/xmgrace.par`;
 

@@ -19,7 +19,7 @@ $startarg			= 0;
 $output_type		= 'PostScript';
 $output_ext			= 'ps';
 $outputpipe			= " >/dev/null 2>&1";
-$agr_ouput			= 'false';
+$agr_output			= 'false';
 
 while ( $argcounter <= $#ARGV )
 {

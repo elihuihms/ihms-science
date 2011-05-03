@@ -8,6 +8,7 @@
 # 04.14.2011	EI	added gnom dialog ability
 # 04.15.2011	EI	added 'errors' option
 # 04.21.2011	EI	changed "chisq" plot to true chi-sq instead of SSE, no longer generates log difference either
+# 05.02.2011	EI	added -agr option, rg and I(0) plots
 
 # default values
 $argcounter			= 0;
@@ -23,6 +24,7 @@ $real_points		= "101";
 $output_type		= "PostScript";
 $output_ext			= "ps";
 $keep_dats			= "false";
+$agr_output			= 'false';
 $input_errors		= "";
 
 # constants
@@ -88,6 +90,9 @@ while ( $argcounter <= $#ARGV )
 	elsif ($ARGV[ $argcounter ] eq "-keep"){
 		$keep_dats = 'true';
 	}
+	elsif ($ARGV[ $argcounter ] eq "-agr"){
+		$agr_output = 'true';
+	}
 	elsif ($ARGV[ $argcounter ] eq "-v"){
 		$outputpipe = '';
 	}
@@ -136,8 +141,6 @@ open RESULTS, ">$results_file" or die "Can't open file $results_file: $!\n";
 # the big show
 $chisq_max = 0;
 $chisq_min = 100000000;
-$chisq_ln_max = 0;
-$chisq_ln_min = 100000000;
 for ($rmax=$rmax_low; $rmax<=$rmax_high; $rmax+=$rmax_step)
 {
 	print("Running gnom with Rmax=$rmax...");
@@ -160,6 +163,9 @@ for ($rmax=$rmax_low; $rmax<=$rmax_high; $rmax+=$rmax_step)
 		if($currLin =~ /Current\s\s\s+(\d+\.\d+)\s+(\d+\.\d+)\s+(\d+\.\d+)\s+(\d+\.\d+)\s+(\d+\.\d+)\s+(\d+\.\d+)/) {
 			$values = "$rmax\t$1\t$2\t$3\t$4\t$5\t$6";
 		}
+		if($currLin =~ /Rg\s+\:\s+(\d.\d+E\+\d+)\s+I\(0\)\s+\:\s+(\d.\d+E\+\d+)/){
+			$attributes = "$1\t$2";
+		}
 	}
 	close GNOM_OUT;
 				
@@ -172,10 +178,8 @@ for ($rmax=$rmax_low; $rmax<=$rmax_high; $rmax+=$rmax_step)
 	$chisq_ln_sum = 0;
 	while(<CHISQ>){
 		@a = split("\t");
-		if (($a[1]>0) && ($a[2]>0) && ($a[3]>0))
-		{
+		if (($a[1]>0) && ($a[2]>0) && ($a[3]>0)){
 			$chisq_sum += (($a[1]-$a[2])**2)/$a[3];
-			$chisq_ln_sum += ((log($a[1])-log($a[2]))**2);
 		}
 	}
 	close(CHISQ);
@@ -185,12 +189,6 @@ for ($rmax=$rmax_low; $rmax<=$rmax_high; $rmax+=$rmax_step)
 	}
 	if ($chisq_sum > $chisq_max){
 		$chisq_max = $chisq_sum;
-	}
-	if ($chisq_ln_sum < $chisq_ln_min){
-		$chisq_ln_min = $chisq_ln_sum;
-	}
-	if ($chisq_ln_sum > $chisq_ln_max){
-		$chisq_ln_max = $chisq_ln_sum;
 	}
 	
 	# normalize P(r)
@@ -206,7 +204,7 @@ for ($rmax=$rmax_low; $rmax<=$rmax_high; $rmax+=$rmax_step)
 	}
 	`tread -col 1 gnom_p.dat | tmath -f divide $scaling_factor | twrite -col 1 gnom_p.dat`;
 	
-	print RESULTS "$values\t$total_estimate\t$chisq_sum\t$chisq_ln_sum\n";
+	print RESULTS "$values\t$total_estimate\t$chisq_sum\t$attributes\n";
 	
 	# save the results of gnom_scrape
 	system("mv gnom_i.dat $output_folder/gnom_".$rmax."_i.dat");
@@ -220,66 +218,75 @@ close RESULTS;
 # generate xmgrace plots
 print "Generating xmgrace plots...";
 write_pars();
-	
-$title1="Pairwise distribution function";
-$subtitle1="$input1 R\\smax\\N: $rmax_low to $rmax_high\\cE\\C in $rmax_step\\cE\\C increments";
-$s1 = "xmgrace -autoscale xy -p pairwise.par -pexec 'title \"$title1\"' -pexec 'subtitle \"$subtitle1\"' ";
-$s1.= "-pexec 'xaxis  tick major ".$rmax_step."' ";
-if ($rmax_high < 50){
-	$s1.= "-pexec 'xaxis  tick minor ticks ".($rmax_step -1)."' ";
+
+$subtitle="$input1 R\\smax\\N: $rmax_low to $rmax_high\\cE\\C in $rmax_step\\cE\\C increments";
+$ticks = " -pexec 'xaxis  tick major ".$rmax_step."'";
+if (($rmax_high - $rmax_low) < 50){
+	$ticks.= " -pexec 'xaxis  tick minor ticks ".($rmax_step -1)."'";
 }
-$s1.= "-settype xy ";
+
+$title1="Pairwise distribution function";
+$s1 = "xmgrace -autoscale xy -p pairwise.par -pexec 'title \"$title1\"' -pexec 'subtitle \"$subtitle\"'";
+$s1.= " -settype xy $ticks";
+if ($agr_output eq 'true'){
+	$s1.= " -saveall $output_folder/pairwise.agr ";
+}
 
 $title2="Gnom fit to experimental data";
-$subtitle2="$input1 R\\smax\\N: $rmax_low to $rmax_high\\cE\\C in $rmax_step\\cE\\C increments";
-$s2 = "xmgrace -autoscale y -p intensity.par -pexec 'title \"$title2\"' -pexec 'subtitle \"$subtitle2\"' -settype xy ";
+$s2 = "xmgrace -autoscale y -p intensity.par -pexec 'title \"$title2\"' -pexec 'subtitle \"$subtitle\"'";
+$s2.= " -settype xy $ticks";
+if ($agr_output eq 'true'){
+	$s2.= " -saveall $output_folder/fit.agr ";
+}
 
 $title3="\\xC\\0\\S2\\N Goodness-of-Fit Plot for gnom R\\smax\\N";
-$subtitle3="$input1 R\\smax\\N: $rmax_low to $rmax_high\\cE\\C in $rmax_step\\cE\\C increments";
-$s3 = "xmgrace -autoscale y -p chisq.par -pexec 'title \"$title3\"' -pexec 'subtitle \"$subtitle3\"' -settype xy -block $output_folder/$results_file -bxy 1:9 ";
-$s3.= "-pexec 'world $rmax_low, $chisq_min, $rmax_high, $chisq_max' ";
-$s3.= "-pexec 'xaxis  tick major $rmax_step' ";
-if (($rmax_high - $rmax_low) < 50){
-	$s3.= "-pexec 'xaxis  tick minor ticks ".($rmax_step -1)."' ";
+$s3 = "xmgrace -autoscale y -p chisq.par -pexec 'title \"$title3\"' -pexec 'subtitle \"$subtitle\"'";
+$s3.= " -settype xy -block $output_folder/$results_file -bxy 1:9 $ticks";
+$s3.= " -pexec 'world $rmax_low, $chisq_min, $rmax_high, $chisq_max' ";
+$s3.= " -pexec 'yaxis  label \"\\xS\\0[(I(q)\\sexp\\N - I(q)\\sgnom\\N) / \\f{Symbol}d\\f{}I(q)\\sexp\\N]\\S2\\N\"' ";
+if ($agr_output eq 'true'){
+	$s3.= " -saveall $output_folder/chisq.agr ";
 }
-$s3.= "-pexec 'yaxis  label \"\\xS\\0[(I(q)\\sexp\\N - I(q)\\sgnom\\N) / \\f{Symbol}d\\f{}I(q)\\sexp\\N]\\S2\\N\"' ";
 
-#$title4="log SSE Goodness-of-Fit Plot for gnom R\\smax\\N";
-#$subtitle4="$input1 R\\smax\\N: $rmax_low to $rmax_high\\cE\\C in $rmax_step\\cE\\C increments";
-#$s4 = "xmgrace -autoscale y -p chisq.par -pexec 'title \"$title4\"' -pexec 'subtitle \"$subtitle4\"' -settype xy -block $output_folder/$results_file -bxy 1:10 ";
-#$s4.= "-pexec 'world $rmax_low, $chisq_ln_min, $rmax_high, $chisq_ln_max' ";
-#$s4.= "-pexec 'xaxis  tick major $rmax_step' ";
-#if (($rmax_high - $rmax_low) < 50){
-#	$s4.= "-pexec 'xaxis  tick minor ticks ".($rmax_step -1)."' ";
-#}
-#$s4.= "-pexec 'yaxis  label \"\\xS\\0[ln(I(q)\\sexp\\N) - ln(I(q)\\sgnom\\N)]\\S2\\N\"' ";
+$s4 = "xmgrace -autoscale xy -p rg.par -pexec 'subtitle \"$subtitle\"'";
+$s4.= " -settype xy -block $output_folder/$results_file -bxy 1:10 $ticks";
+if ($agr_output eq 'true'){
+	$s4.= " -saveall $output_folder/rg.agr ";
+}
+
+$s5 = "xmgrace -autoscale xy -p izero.par -pexec 'subtitle \"$subtitle\"'";
+$s5.= " -settype xy -block $output_folder/$results_file -bxy 1:11 $ticks";
+if ($agr_output eq 'true'){
+	$s5.= "-saveall $output_folder/izero.agr ";
+}
 
 $i = 0;
 for ($rmax=$rmax_low; $rmax<=$rmax_high; $rmax+=$rmax_step)
 {
-	$s1.= "-block $output_folder/gnom_".$rmax."_p.dat -bxy 1:2 ";
-	$s1.= "-pexec 's".$i." legend \"$rmax \\cE\\C\"' ";
+	$s1.= " -block $output_folder/gnom_".$rmax."_p.dat -bxy 1:2 ";
+	$s1.= " -pexec 's".$i." legend \"$rmax \\cE\\C\"' ";
 	
-	$s2.= "-block $output_folder/gnom_".$rmax."_i.dat -bxy 1:3 ";
-	$s2.= "-pexec 's".$i." legend \"$rmax \\cE\\C\"' ";
+	$s2.= " -block $output_folder/gnom_".$rmax."_i.dat -bxy 1:3 ";
+	$s2.= " -pexec 's".$i." legend \"$rmax \\cE\\C\"' ";
 	$i++;
 }
 
-$s1.= "-hardcopy -hdevice $output_type -printfile $output_folder/gnom_p.$output_ext";
-
 # append original intensity data
-$s2.= "-block $output_folder/gnom_".$rmax."_i.dat -bxy :1:2 ";
-$s2.= "-pexec 's".$i." legend \"Experimental\"' ";
-$s2.= "-hardcopy -hdevice $output_type -printfile $output_folder/gnom_i.$output_ext";
+$s2.= " -block $output_folder/gnom_".$rmax."_i.dat -bxy 1:2 -pexec 's".$i." legend \"Experimental\"' ";
 
-$s3.= "-hardcopy -hdevice $output_type -printfile $output_folder/gnom_chisq.$output_ext";
-#$s4.= "-hardcopy -hdevice $output_type -printfile $output_folder/gnom_logchisq.$output_ext";
+$s1.= " -hardcopy -hdevice $output_type -printfile $output_folder/pairwise.$output_ext";
+$s2.= " -hardcopy -hdevice $output_type -printfile $output_folder/fit.$output_ext";
+$s3.= " -hardcopy -hdevice $output_type -printfile $output_folder/chisq.$output_ext";
+$s4.= " -hardcopy -hdevice $output_type -printfile $output_folder/rg.$output_ext";
+$s5.= " -hardcopy -hdevice $output_type -printfile $output_folder/izero.$output_ext";
 
 # execute the xmgrace plot commands
 `$s1 $outputpipe`;
 `$s2 $outputpipe`;
 `$s3 $outputpipe`;
-#`$s4 $outputpipe`;
+`$s4 $outputpipe`;
+`$s5 $outputpipe`;
+
 print "Done.\n";
 
 # clean up
@@ -289,6 +296,8 @@ print "Done.\n";
 `rm pairwise.par`;
 `rm intensity.par`;
 `rm chisq.par`;
+`rm rg.par`;
+`rm izero.par`;
 
 # remove the gnom_scrape outputs now that we're done
 if($keep_dats ne 'true')
@@ -1708,6 +1717,610 @@ with g0
 chisq_END
 
 	open(OUTPUT, ">chisq.par") or die("Can't open 'chisq.par' for writing: $!");
+	print OUTPUT $string;
+	close(OUTPUT);
+
+$string = <<rg_par;
+# Grace project file
+#
+version 50122
+page size 792, 612
+page scroll 5%
+page inout 5%
+link page off
+map font 0 to "Times-Roman", "Times-Roman"
+map font 1 to "Times-Italic", "Times-Italic"
+map font 2 to "Times-Bold", "Times-Bold"
+map font 3 to "Times-BoldItalic", "Times-BoldItalic"
+map font 4 to "Helvetica", "Helvetica"
+map font 5 to "Helvetica-Oblique", "Helvetica-Oblique"
+map font 6 to "Helvetica-Bold", "Helvetica-Bold"
+map font 7 to "Helvetica-BoldOblique", "Helvetica-BoldOblique"
+map font 8 to "Courier", "Courier"
+map font 9 to "Courier-Oblique", "Courier-Oblique"
+map font 10 to "Courier-Bold", "Courier-Bold"
+map font 11 to "Courier-BoldOblique", "Courier-BoldOblique"
+map font 12 to "Symbol", "Symbol"
+map font 13 to "ZapfDingbats", "ZapfDingbats"
+map color 0 to (255, 255, 255), "white"
+map color 1 to (0, 0, 0), "black"
+map color 2 to (255, 0, 0), "red"
+map color 3 to (0, 255, 0), "green"
+map color 4 to (0, 0, 255), "blue"
+map color 5 to (255, 255, 0), "yellow"
+map color 6 to (188, 143, 143), "brown"
+map color 7 to (220, 220, 220), "grey"
+map color 8 to (148, 0, 211), "violet"
+map color 9 to (0, 255, 255), "cyan"
+map color 10 to (255, 0, 255), "magenta"
+map color 11 to (255, 165, 0), "orange"
+map color 12 to (114, 33, 188), "indigo"
+map color 13 to (103, 7, 72), "maroon"
+map color 14 to (64, 224, 208), "turquoise"
+map color 15 to (0, 139, 0), "green4"
+reference date 0
+date wrap off
+date wrap year 1950
+default linewidth 1.0
+default linestyle 1
+default color 1
+default pattern 1
+default font 0
+default char size 1.000000
+default symbol size 1.000000
+default sformat "%.8g"
+background color 0
+page background fill on
+timestamp off
+timestamp 0.03, 0.03
+timestamp color 1
+timestamp rot 0
+timestamp font 0
+timestamp char size 1.000000
+timestamp def "Mon May  2 21:47:37 2011"
+r0 off
+link r0 to g0
+r0 type above
+r0 linestyle 1
+r0 linewidth 1.0
+r0 color 1
+r0 line 0, 0, 0, 0
+r1 off
+link r1 to g0
+r1 type above
+r1 linestyle 1
+r1 linewidth 1.0
+r1 color 1
+r1 line 0, 0, 0, 0
+r2 off
+link r2 to g0
+r2 type above
+r2 linestyle 1
+r2 linewidth 1.0
+r2 color 1
+r2 line 0, 0, 0, 0
+r3 off
+link r3 to g0
+r3 type above
+r3 linestyle 1
+r3 linewidth 1.0
+r3 color 1
+r3 line 0, 0, 0, 0
+r4 off
+link r4 to g0
+r4 type above
+r4 linestyle 1
+r4 linewidth 1.0
+r4 color 1
+r4 line 0, 0, 0, 0
+g0 on
+g0 hidden false
+g0 type XY
+g0 stacked false
+g0 bar hgap 0.000000
+g0 fixedpoint off
+g0 fixedpoint type 0
+g0 fixedpoint xy 0.000000, 0.000000
+g0 fixedpoint format general general
+g0 fixedpoint prec 6, 6
+with g0
+    world 50, 20, 200, 40
+    stack world 0, 0, 0, 0
+    znorm 1
+    view 0.150000, 0.150000, 1.150000, 0.850000
+    title "Calculated gnom R\\sg\\N values"
+    title font 0
+    title size 1.500000
+    title color 1
+    subtitle "xxx"
+    subtitle font 0
+    subtitle size 1.000000
+    subtitle color 1
+    xaxes scale Normal
+    yaxes scale Normal
+    xaxes invert off
+    yaxes invert off
+    xaxis  on
+    xaxis  type zero false
+    xaxis  offset 0.000000 , 0.000000
+    xaxis  bar on
+    xaxis  bar color 1
+    xaxis  bar linestyle 1
+    xaxis  bar linewidth 1.0
+    xaxis  label "R\\smax\\N (\\cE\\C)"
+    xaxis  label layout para
+    xaxis  label place auto
+    xaxis  label char size 1.000000
+    xaxis  label font 0
+    xaxis  label color 1
+    xaxis  label place normal
+    xaxis  tick on
+    xaxis  tick major 50
+    xaxis  tick minor ticks 1
+    xaxis  tick default 6
+    xaxis  tick place rounded true
+    xaxis  tick in
+    xaxis  tick major size 1.000000
+    xaxis  tick major color 1
+    xaxis  tick major linewidth 1.0
+    xaxis  tick major linestyle 1
+    xaxis  tick major grid off
+    xaxis  tick minor color 1
+    xaxis  tick minor linewidth 1.0
+    xaxis  tick minor linestyle 1
+    xaxis  tick minor grid off
+    xaxis  tick minor size 0.500000
+    xaxis  ticklabel on
+    xaxis  ticklabel format general
+    xaxis  ticklabel prec 5
+    xaxis  ticklabel formula ""
+    xaxis  ticklabel append ""
+    xaxis  ticklabel prepend ""
+    xaxis  ticklabel angle 0
+    xaxis  ticklabel skip 0
+    xaxis  ticklabel stagger 0
+    xaxis  ticklabel place normal
+    xaxis  ticklabel offset auto
+    xaxis  ticklabel offset 0.000000 , 0.010000
+    xaxis  ticklabel start type auto
+    xaxis  ticklabel start 0.000000
+    xaxis  ticklabel stop type auto
+    xaxis  ticklabel stop 0.000000
+    xaxis  ticklabel char size 1.000000
+    xaxis  ticklabel font 0
+    xaxis  ticklabel color 1
+    xaxis  tick place normal
+    xaxis  tick spec type none
+    yaxis  on
+    yaxis  type zero false
+    yaxis  offset 0.000000 , 0.000000
+    yaxis  bar on
+    yaxis  bar color 1
+    yaxis  bar linestyle 1
+    yaxis  bar linewidth 1.0
+    yaxis  label "R\\sg\\N (\\cE\\C)"
+    yaxis  label layout para
+    yaxis  label place auto
+    yaxis  label char size 1.000000
+    yaxis  label font 0
+    yaxis  label color 1
+    yaxis  label place normal
+    yaxis  tick on
+    yaxis  tick major 5
+    yaxis  tick minor ticks 1
+    yaxis  tick default 6
+    yaxis  tick place rounded true
+    yaxis  tick in
+    yaxis  tick major size 1.000000
+    yaxis  tick major color 1
+    yaxis  tick major linewidth 1.0
+    yaxis  tick major linestyle 1
+    yaxis  tick major grid off
+    yaxis  tick minor color 1
+    yaxis  tick minor linewidth 1.0
+    yaxis  tick minor linestyle 1
+    yaxis  tick minor grid off
+    yaxis  tick minor size 0.500000
+    yaxis  ticklabel on
+    yaxis  ticklabel format general
+    yaxis  ticklabel prec 5
+    yaxis  ticklabel formula ""
+    yaxis  ticklabel append ""
+    yaxis  ticklabel prepend ""
+    yaxis  ticklabel angle 0
+    yaxis  ticklabel skip 0
+    yaxis  ticklabel stagger 0
+    yaxis  ticklabel place normal
+    yaxis  ticklabel offset auto
+    yaxis  ticklabel offset 0.000000 , 0.010000
+    yaxis  ticklabel start type auto
+    yaxis  ticklabel start 0.000000
+    yaxis  ticklabel stop type auto
+    yaxis  ticklabel stop 0.000000
+    yaxis  ticklabel char size 1.000000
+    yaxis  ticklabel font 0
+    yaxis  ticklabel color 1
+    yaxis  tick place normal
+    yaxis  tick spec type none
+    altxaxis  off
+    altyaxis  off
+    legend on
+    legend loctype view
+    legend 0.85, 0.8
+    legend box color 1
+    legend box pattern 1
+    legend box linewidth 1.0
+    legend box linestyle 1
+    legend box fill color 0
+    legend box fill pattern 1
+    legend font 0
+    legend char size 1.000000
+    legend color 1
+    legend length 4
+    legend vgap 1
+    legend hgap 1
+    legend invert false
+    frame type 0
+    frame linestyle 1
+    frame linewidth 1.0
+    frame color 1
+    frame pattern 1
+    frame background color 0
+    frame background pattern 0
+    s0 hidden false
+    s0 type xy
+    s0 symbol 0
+    s0 symbol size 1.000000
+    s0 symbol color 1
+    s0 symbol pattern 1
+    s0 symbol fill color 1
+    s0 symbol fill pattern 0
+    s0 symbol linewidth 1.0
+    s0 symbol linestyle 1
+    s0 symbol char 65
+    s0 symbol char font 0
+    s0 symbol skip 0
+    s0 line type 1
+    s0 line linestyle 1
+    s0 line linewidth 1.0
+    s0 line color 1
+    s0 line pattern 1
+    s0 baseline type 0
+    s0 baseline off
+    s0 dropline off
+    s0 fill type 0
+    s0 fill rule 0
+    s0 fill color 1
+    s0 fill pattern 1
+    s0 avalue off
+    s0 avalue type 2
+    s0 avalue char size 1.000000
+    s0 avalue font 0
+    s0 avalue color 1
+    s0 avalue rot 0
+    s0 avalue format general
+    s0 avalue prec 3
+    s0 avalue prepend ""
+    s0 avalue append ""
+    s0 avalue offset 0.000000 , 0.000000
+    s0 errorbar on
+    s0 errorbar place both
+    s0 errorbar color 1
+    s0 errorbar pattern 1
+    s0 errorbar size 1.000000
+    s0 errorbar linewidth 1.0
+    s0 errorbar linestyle 1
+    s0 errorbar riser linewidth 1.0
+    s0 errorbar riser linestyle 1
+    s0 errorbar riser clip off
+    s0 errorbar riser clip length 0.100000
+    s0 comment "Cols 1:10"
+    s0 legend  ""
+rg_par
+
+	open(OUTPUT, ">rg.par") or die("Can't open 'rg.par' for writing: $!");
+	print OUTPUT $string;
+	close(OUTPUT);
+
+$string = <<izero_par;
+# Grace project file
+#
+version 50122
+page size 792, 612
+page scroll 5%
+page inout 5%
+link page off
+map font 0 to "Times-Roman", "Times-Roman"
+map font 1 to "Times-Italic", "Times-Italic"
+map font 2 to "Times-Bold", "Times-Bold"
+map font 3 to "Times-BoldItalic", "Times-BoldItalic"
+map font 4 to "Helvetica", "Helvetica"
+map font 5 to "Helvetica-Oblique", "Helvetica-Oblique"
+map font 6 to "Helvetica-Bold", "Helvetica-Bold"
+map font 7 to "Helvetica-BoldOblique", "Helvetica-BoldOblique"
+map font 8 to "Courier", "Courier"
+map font 9 to "Courier-Oblique", "Courier-Oblique"
+map font 10 to "Courier-Bold", "Courier-Bold"
+map font 11 to "Courier-BoldOblique", "Courier-BoldOblique"
+map font 12 to "Symbol", "Symbol"
+map font 13 to "ZapfDingbats", "ZapfDingbats"
+map color 0 to (255, 255, 255), "white"
+map color 1 to (0, 0, 0), "black"
+map color 2 to (255, 0, 0), "red"
+map color 3 to (0, 255, 0), "green"
+map color 4 to (0, 0, 255), "blue"
+map color 5 to (255, 255, 0), "yellow"
+map color 6 to (188, 143, 143), "brown"
+map color 7 to (220, 220, 220), "grey"
+map color 8 to (148, 0, 211), "violet"
+map color 9 to (0, 255, 255), "cyan"
+map color 10 to (255, 0, 255), "magenta"
+map color 11 to (255, 165, 0), "orange"
+map color 12 to (114, 33, 188), "indigo"
+map color 13 to (103, 7, 72), "maroon"
+map color 14 to (64, 224, 208), "turquoise"
+map color 15 to (0, 139, 0), "green4"
+reference date 0
+date wrap off
+date wrap year 1950
+default linewidth 1.0
+default linestyle 1
+default color 1
+default pattern 1
+default font 0
+default char size 1.000000
+default symbol size 1.000000
+default sformat "%.8g"
+background color 0
+page background fill on
+timestamp off
+timestamp 0.03, 0.03
+timestamp color 1
+timestamp rot 0
+timestamp font 0
+timestamp char size 1.000000
+timestamp def "Mon May  2 21:45:58 2011"
+r0 off
+link r0 to g0
+r0 type above
+r0 linestyle 1
+r0 linewidth 1.0
+r0 color 1
+r0 line 0, 0, 0, 0
+r1 off
+link r1 to g0
+r1 type above
+r1 linestyle 1
+r1 linewidth 1.0
+r1 color 1
+r1 line 0, 0, 0, 0
+r2 off
+link r2 to g0
+r2 type above
+r2 linestyle 1
+r2 linewidth 1.0
+r2 color 1
+r2 line 0, 0, 0, 0
+r3 off
+link r3 to g0
+r3 type above
+r3 linestyle 1
+r3 linewidth 1.0
+r3 color 1
+r3 line 0, 0, 0, 0
+r4 off
+link r4 to g0
+r4 type above
+r4 linestyle 1
+r4 linewidth 1.0
+r4 color 1
+r4 line 0, 0, 0, 0
+g0 on
+g0 hidden false
+g0 type XY
+g0 stacked false
+g0 bar hgap 0.000000
+g0 fixedpoint off
+g0 fixedpoint type 0
+g0 fixedpoint xy 0.000000, 0.000000
+g0 fixedpoint format general general
+g0 fixedpoint prec 6, 6
+with g0
+    world 50, 0, 200, 500
+    stack world 0, 0, 0, 0
+    znorm 1
+    view 0.150000, 0.150000, 1.150000, 0.850000
+    title "Calculated gnom I(0) values"
+    title font 0
+    title size 1.500000
+    title color 1
+    subtitle "xxx"
+    subtitle font 0
+    subtitle size 1.000000
+    subtitle color 1
+    xaxes scale Normal
+    yaxes scale Normal
+    xaxes invert off
+    yaxes invert off
+    xaxis  on
+    xaxis  type zero false
+    xaxis  offset 0.000000 , 0.000000
+    xaxis  bar on
+    xaxis  bar color 1
+    xaxis  bar linestyle 1
+    xaxis  bar linewidth 1.0
+    xaxis  label "R\\smax\\N (\\cE\\C)"
+    xaxis  label layout para
+    xaxis  label place auto
+    xaxis  label char size 1.000000
+    xaxis  label font 0
+    xaxis  label color 1
+    xaxis  label place normal
+    xaxis  tick on
+    xaxis  tick major 50
+    xaxis  tick minor ticks 1
+    xaxis  tick default 6
+    xaxis  tick place rounded true
+    xaxis  tick in
+    xaxis  tick major size 1.000000
+    xaxis  tick major color 1
+    xaxis  tick major linewidth 1.0
+    xaxis  tick major linestyle 1
+    xaxis  tick major grid off
+    xaxis  tick minor color 1
+    xaxis  tick minor linewidth 1.0
+    xaxis  tick minor linestyle 1
+    xaxis  tick minor grid off
+    xaxis  tick minor size 0.500000
+    xaxis  ticklabel on
+    xaxis  ticklabel format general
+    xaxis  ticklabel prec 5
+    xaxis  ticklabel formula ""
+    xaxis  ticklabel append ""
+    xaxis  ticklabel prepend ""
+    xaxis  ticklabel angle 0
+    xaxis  ticklabel skip 0
+    xaxis  ticklabel stagger 0
+    xaxis  ticklabel place normal
+    xaxis  ticklabel offset auto
+    xaxis  ticklabel offset 0.000000 , 0.010000
+    xaxis  ticklabel start type auto
+    xaxis  ticklabel start 0.000000
+    xaxis  ticklabel stop type auto
+    xaxis  ticklabel stop 0.000000
+    xaxis  ticklabel char size 1.000000
+    xaxis  ticklabel font 0
+    xaxis  ticklabel color 1
+    xaxis  tick place normal
+    xaxis  tick spec type none
+    yaxis  on
+    yaxis  type zero false
+    yaxis  offset 0.000000 , 0.000000
+    yaxis  bar on
+    yaxis  bar color 1
+    yaxis  bar linestyle 1
+    yaxis  bar linewidth 1.0
+    yaxis  label "I(0)"
+    yaxis  label layout para
+    yaxis  label place auto
+    yaxis  label char size 1.000000
+    yaxis  label font 0
+    yaxis  label color 1
+    yaxis  label place normal
+    yaxis  tick on
+    yaxis  tick major 50
+    yaxis  tick minor ticks 1
+    yaxis  tick default 6
+    yaxis  tick place rounded true
+    yaxis  tick in
+    yaxis  tick major size 1.000000
+    yaxis  tick major color 1
+    yaxis  tick major linewidth 1.0
+    yaxis  tick major linestyle 1
+    yaxis  tick major grid off
+    yaxis  tick minor color 1
+    yaxis  tick minor linewidth 1.0
+    yaxis  tick minor linestyle 1
+    yaxis  tick minor grid off
+    yaxis  tick minor size 0.500000
+    yaxis  ticklabel on
+    yaxis  ticklabel format general
+    yaxis  ticklabel prec 5
+    yaxis  ticklabel formula ""
+    yaxis  ticklabel append ""
+    yaxis  ticklabel prepend ""
+    yaxis  ticklabel angle 0
+    yaxis  ticklabel skip 0
+    yaxis  ticklabel stagger 0
+    yaxis  ticklabel place normal
+    yaxis  ticklabel offset auto
+    yaxis  ticklabel offset 0.000000 , 0.010000
+    yaxis  ticklabel start type auto
+    yaxis  ticklabel start 0.000000
+    yaxis  ticklabel stop type auto
+    yaxis  ticklabel stop 0.000000
+    yaxis  ticklabel char size 1.000000
+    yaxis  ticklabel font 0
+    yaxis  ticklabel color 1
+    yaxis  tick place normal
+    yaxis  tick spec type none
+    altxaxis  off
+    altyaxis  off
+    legend on
+    legend loctype view
+    legend 0.85, 0.8
+    legend box color 1
+    legend box pattern 1
+    legend box linewidth 1.0
+    legend box linestyle 1
+    legend box fill color 0
+    legend box fill pattern 1
+    legend font 0
+    legend char size 1.000000
+    legend color 1
+    legend length 4
+    legend vgap 1
+    legend hgap 1
+    legend invert false
+    frame type 0
+    frame linestyle 1
+    frame linewidth 1.0
+    frame color 1
+    frame pattern 1
+    frame background color 0
+    frame background pattern 0
+    s0 hidden false
+    s0 type xy
+    s0 symbol 0
+    s0 symbol size 1.000000
+    s0 symbol color 1
+    s0 symbol pattern 1
+    s0 symbol fill color 1
+    s0 symbol fill pattern 0
+    s0 symbol linewidth 1.0
+    s0 symbol linestyle 1
+    s0 symbol char 65
+    s0 symbol char font 0
+    s0 symbol skip 0
+    s0 line type 1
+    s0 line linestyle 1
+    s0 line linewidth 1.0
+    s0 line color 1
+    s0 line pattern 1
+    s0 baseline type 0
+    s0 baseline off
+    s0 dropline off
+    s0 fill type 0
+    s0 fill rule 0
+    s0 fill color 1
+    s0 fill pattern 1
+    s0 avalue off
+    s0 avalue type 2
+    s0 avalue char size 1.000000
+    s0 avalue font 0
+    s0 avalue color 1
+    s0 avalue rot 0
+    s0 avalue format general
+    s0 avalue prec 3
+    s0 avalue prepend ""
+    s0 avalue append ""
+    s0 avalue offset 0.000000 , 0.000000
+    s0 errorbar on
+    s0 errorbar place both
+    s0 errorbar color 1
+    s0 errorbar pattern 1
+    s0 errorbar size 1.000000
+    s0 errorbar linewidth 1.0
+    s0 errorbar linestyle 1
+    s0 errorbar riser linewidth 1.0
+    s0 errorbar riser linestyle 1
+    s0 errorbar riser clip off
+    s0 errorbar riser clip length 0.100000
+    s0 comment "Cols 1:10"
+    s0 legend  ""
+izero_par
+
+	open(OUTPUT, ">izero.par") or die("Can't open 'izero.par' for writing: $!");
 	print OUTPUT $string;
 	close(OUTPUT);
 

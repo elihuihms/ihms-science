@@ -9,19 +9,15 @@ Uses the python eval() function, or bc if specified
 # 08.12.2010	Ihms	written
 # 08.16.2010	Ihms	added ability to calculate via eval()
 # 08.18.2010	Ihms	added coefficients
-# 04.26.2010	EI		changed name to teval, added some help info
-version='04.26.2010'
+# 04.26.2011	EI		changed name to teval, added some help info
+# 05.03.2011	EI		incorporated math_bits.py
+version='05.03.2011'
 
 #
 # imports
 import sys
 import os
 from math import *
-try:
-	from math_bits import frange, isNumber
-except:
-	print >> sys.stderr, "Could not import math_bits.py. Check your $PYTHONPATH.\n"
-	exit()
 
 #
 # subroutines
@@ -96,6 +92,38 @@ def showIfVerbose(s):
 	global verbose
 	if (verbose):
 		sys.stderr.write(s)
+		
+## {{{ http://code.activestate.com/recipes/66472/ (r1)
+def frange(start, end=None, inc=None):
+    """frange( start, end, step ) A range function that can accept float increments, analogous to range()"""
+
+    if end == None:
+        end = start + 0.0
+        start = 0.0
+
+    if inc == None:
+        inc = 1.0
+
+    L = []
+    while 1:
+        next = start + len(L) * inc
+        if inc > 0 and next >= end:
+            break
+        elif inc < 0 and next <= end:
+            break
+        L.append(next)
+        
+    return L
+## end of http://code.activestate.com/recipes/66472/ }}}
+
+## http://stackoverflow.com/questions/354038/checking-if-string-is-a-number-python
+def isNumber(s):
+	"""isNumber( string ) : determines if passed <string> is convertable to a number """
+	try:
+		float (s)
+		return True
+	except ValueError:
+		return False
 
 # default parameters
 function 	= False

@@ -228,37 +228,22 @@ if (($rmax_high - $rmax_low) < 50){
 $title1="Pairwise distribution function";
 $s1 = "xmgrace -autoscale xy -p pairwise.par -pexec 'title \"$title1\"' -pexec 'subtitle \"$subtitle\"'";
 $s1.= " -settype xy $ticks";
-if ($agr_output eq 'true'){
-	$s1.= " -saveall $output_folder/pairwise.agr ";
-}
 
 $title2="Gnom fit to experimental data";
 $s2 = "xmgrace -autoscale y -p intensity.par -pexec 'title \"$title2\"' -pexec 'subtitle \"$subtitle\"'";
 $s2.= " -settype xy $ticks";
-if ($agr_output eq 'true'){
-	$s2.= " -saveall $output_folder/fit.agr ";
-}
 
 $title3="\\xC\\0\\S2\\N Goodness-of-Fit Plot for gnom R\\smax\\N";
 $s3 = "xmgrace -autoscale y -p chisq.par -pexec 'title \"$title3\"' -pexec 'subtitle \"$subtitle\"'";
 $s3.= " -settype xy -block $output_folder/$results_file -bxy 1:9 $ticks";
 $s3.= " -pexec 'world $rmax_low, $chisq_min, $rmax_high, $chisq_max' ";
 $s3.= " -pexec 'yaxis  label \"\\xS\\0[(I(q)\\sexp\\N - I(q)\\sgnom\\N) / \\f{Symbol}d\\f{}I(q)\\sexp\\N]\\S2\\N\"' ";
-if ($agr_output eq 'true'){
-	$s3.= " -saveall $output_folder/chisq.agr ";
-}
 
 $s4 = "xmgrace -autoscale xy -p rg.par -pexec 'subtitle \"$subtitle\"'";
 $s4.= " -settype xy -block $output_folder/$results_file -bxy 1:10 $ticks";
-if ($agr_output eq 'true'){
-	$s4.= " -saveall $output_folder/rg.agr ";
-}
 
 $s5 = "xmgrace -autoscale xy -p izero.par -pexec 'subtitle \"$subtitle\"'";
 $s5.= " -settype xy -block $output_folder/$results_file -bxy 1:11 $ticks";
-if ($agr_output eq 'true'){
-	$s5.= "-saveall $output_folder/izero.agr ";
-}
 
 $i = 0;
 for ($rmax=$rmax_low; $rmax<=$rmax_high; $rmax+=$rmax_step)
@@ -273,6 +258,14 @@ for ($rmax=$rmax_low; $rmax<=$rmax_high; $rmax+=$rmax_step)
 
 # append original intensity data
 $s2.= " -block $output_folder/gnom_".$rmax."_i.dat -bxy 1:2 -pexec 's".$i." legend \"Experimental\"' ";
+
+if ($agr_output eq 'true'){
+	$s1.= " -saveall $output_folder/pairwise.agr";
+	$s2.= " -saveall $output_folder/fit.agr";
+	$s3.= " -saveall $output_folder/chisq.agr";
+	$s4.= " -saveall $output_folder/rg.agr";
+	$s5.= " -saveall $output_folder/izero.agr";
+}
 
 $s1.= " -hardcopy -hdevice $output_type -printfile $output_folder/pairwise.$output_ext";
 $s2.= " -hardcopy -hdevice $output_type -printfile $output_folder/fit.$output_ext";

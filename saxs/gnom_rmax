@@ -9,6 +9,8 @@
 # 04.15.2011	EI	added 'errors' option
 # 04.21.2011	EI	changed "chisq" plot to true chi-sq instead of SSE, no longer generates log difference either
 # 05.02.2011	EI	added -agr option, rg and I(0) plots
+# 05.04.2011	EI	using real-space Rg values
+$version='05.04.2011';
 
 # default values
 $argcounter			= 0;
@@ -93,6 +95,10 @@ while ( $argcounter <= $#ARGV )
 	elsif ($ARGV[ $argcounter ] eq "-agr"){
 		$agr_output = 'true';
 	}
+	elsif ($ARGV[ $argcounter ] eq '-version'){
+		print $version."\n";
+		exit;
+	}	
 	elsif ($ARGV[ $argcounter ] eq "-v"){
 		$outputpipe = '';
 	}
@@ -154,6 +160,12 @@ for ($rmax=$rmax_low; $rmax<=$rmax_high; $rmax+=$rmax_step)
 	print("Done\n");
 
 	# parse gnom's results
+	
+	$total_estimate='';
+	$values='';
+	$rg='';
+	$izero='';
+	
 	open GNOM_OUT, "$gnom_out" or die "Can't open $gnom_out: $!\n"; 
     while ($currLin = <GNOM_OUT>) 
     {
@@ -163,8 +175,12 @@ for ($rmax=$rmax_low; $rmax<=$rmax_high; $rmax+=$rmax_step)
 		if($currLin =~ /Current\s\s\s+(\d+\.\d+)\s+(\d+\.\d+)\s+(\d+\.\d+)\s+(\d+\.\d+)\s+(\d+\.\d+)\s+(\d+\.\d+)/) {
 			$values = "$rmax\t$1\t$2\t$3\t$4\t$5\t$6";
 		}
-		if($currLin =~ /Rg\s+\:\s+(\d.\d+E\+\d+)\s+I\(0\)\s+\:\s+(\d.\d+E\+\d+)/){
-			$attributes = "$1\t$2";
+		# Rg =   31.31 +- 0.011  I(0) =   0.4218E+03 +-  0.1576E+00
+		if($currLin =~ /Rg\s+=\s+(\d+\.?\d*E?[-+]?\d*)\s+/){
+			$rg = $1;
+		}
+		if($currLin =~ /I\(0\)\s+=\s+(\d+\.?\d*E?[-+]?\d*)\s+/){
+			$izero = $1;
 		}
 	}
 	close GNOM_OUT;
@@ -204,7 +220,7 @@ for ($rmax=$rmax_low; $rmax<=$rmax_high; $rmax+=$rmax_step)
 	}
 	`tread -col 1 gnom_p.dat | tmath -f divide $scaling_factor | twrite -col 1 gnom_p.dat`;
 	
-	print RESULTS "$values\t$total_estimate\t$chisq_sum\t$attributes\n";
+	print RESULTS "$values\t$total_estimate\t$chisq_sum\t$rg\t$izero\n";
 	
 	# save the results of gnom_scrape
 	system("mv gnom_i.dat $output_folder/gnom_".$rmax."_i.dat");

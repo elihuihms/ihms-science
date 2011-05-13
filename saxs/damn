@@ -164,6 +164,6 @@ sub write_inputs
 
 sub show_help
 {
-	print "damn -ans <dammin.ans> (-n=10) (-start=N) (-cores=1)\n";
+	print "damn -ans <dammin.ans> (-n=10) (-start=N) (-cores=1) -exe (dammin)\n";
 	exit;
 }

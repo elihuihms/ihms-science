@@ -5,7 +5,7 @@
 #
 
 if (($ARGV[0] eq '') || ($ARGV[0] eq '-h')){
-	print "tinterpolate <file1> <file2>\n";
+	print "tinterpolate <x values file> <xy values file>\n";
 	exit;
 }
 

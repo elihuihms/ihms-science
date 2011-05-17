@@ -44,7 +44,7 @@ while ( $argcounter <= $#ARGV )
 		$startarg++;
 	}
 	elsif ($ARGV[ $argcounter ] eq "-xmgr"){
-		$xmgrace_options .= $ARGV[ $argcounter +1 ];
+		$xmgrace_options .= ' '.$ARGV[ $argcounter +1 ];
 		$argcounter++;
 		$startarg+=2;
 	}

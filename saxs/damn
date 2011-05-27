@@ -9,6 +9,7 @@
 # 04.13.2011	EI	Eric found bug that didn't close configuration file handle properly
 # 04.25.2011	EI	fixed proc spawning
 # 04.28.2011	EI	fixed batch averaging
+# 05.27.2011	EI	added nodie option
 $version='04.28.11';
 
 # default values
@@ -20,6 +21,7 @@ $num_runs		= 10;
 $num_procs		= 1;
 $average		= 'false';
 $outputpipe		= " >/dev/null 2>&1 &";
+$nodie			= 'false';
 
 # constants
 $sleep_interval = 10; #seconds
@@ -58,6 +60,9 @@ while ( $argcounter <= $#ARGV )
 	elsif ($ARGV[ $argcounter ] eq "-version"){
 		print $version."\n";
 		exit;
+	}
+	elsif ($ARGV[ $argcounter ] eq "-nodie"){
+		$nodie = 'true';
 	}
 	elsif ($ARGV[ $argcounter ] eq "-h"){
 		show_help();
@@ -103,11 +108,18 @@ while($input_counter < $num_runs)
 	sleep($sleep_interval);
 }
 
+if ($nodie ne 'false')
+{
+	while(count_procs($damn_exe)>0){
+		sleep($sleep_interval);
+	}
+}
+
 # do we calculate an average structure using damaver?
 if ($average!='false')
 {
 	# wait until all dammin processes are finished
-	while(count_procs('dammin')>0){
+	while(count_procs($damn_exe)>0){
 		sleep($sleep_interval);
 	}
 

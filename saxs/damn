@@ -9,8 +9,8 @@
 # 04.13.2011	EI	Eric found bug that didn't close configuration file handle properly
 # 04.25.2011	EI	fixed proc spawning
 # 04.28.2011	EI	fixed batch averaging
-# 05.27.2011	EI	added nodie option
-$version='04.28.11';
+# 05.27.2011	EI	added nodie option, proc detection (again!)
+$version='05.27.11';
 
 # default values
 $argcounter		= 0;
@@ -153,7 +153,7 @@ if ($average!='false')
 sub count_procs
 {
 	$procname = $_[0];
-	return `ps x | grep '$procname' | grep -vc 'grep'`;
+	return `ps xc | grep -c '$procname'`;
 }
 
 sub write_inputs

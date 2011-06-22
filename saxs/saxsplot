@@ -633,9 +633,9 @@ with g0
     s5 type xy
     s5 symbol 0
     s5 symbol size 1.000000
-    s5 symbol color 6
+    s5 symbol color 12
     s5 symbol pattern 1
-    s5 symbol fill color 6
+    s5 symbol fill color 12
     s5 symbol fill pattern 0
     s5 symbol linewidth 1.0
     s5 symbol linestyle 1
@@ -645,7 +645,7 @@ with g0
     s5 line type 1
     s5 line linestyle 1
     s5 line linewidth 1.0
-    s5 line color 6
+    s5 line color 12
     s5 line pattern 1
     s5 baseline type 0
     s5 baseline off
@@ -667,7 +667,7 @@ with g0
     s5 avalue offset 0.000000 , 0.000000
     s5 errorbar on
     s5 errorbar place both
-    s5 errorbar color 6
+    s5 errorbar color 12
     s5 errorbar pattern 1
     s5 errorbar size 1.000000
     s5 errorbar linewidth 1.0

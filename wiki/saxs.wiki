@@ -2,9 +2,9 @@
 
 =Notes for SAXS scripts=
 
- These Perl scripts are to ease the analysis and display of SAXS data, semi-automating several time consuming components.
+ These Perl scripts are to ease the analysis and display of SAXS data, semi-automating several time consuming components. They are designed to complement the excellent and industry-standard [http://www.embl-hamburg.de/biosaxs/software.html ATSAS] SAXS software package.
 
- Note that  these scripts rely heavily upon the "tab" suite of utilities ('tread', 'tinsert', 'tscale', etc.), as well as the plotting package xmgrace. Both the tab directory and the xmgrace executable should be present in your shell environment's $path variable. For a brief description of any script's usage and options, you may execute it alone with a sole -h option (help).
+ Note that these scripts rely heavily upon the "[tab]" suite of utilities ('tread', 'tinsert', 'tscale', etc.), as well as the plotting package [http://plasma-gate.weizmann.ac.il/Grace/ xmgrace]. Both the tab directory and the xmgrace executable should be present in your shell environment's $path variable. For a brief description of any script's usage and options, you may execute it alone with a sole -h option (help).
 
 <wiki:toc max_depth="2" />
 

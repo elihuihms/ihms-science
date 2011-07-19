@@ -7,6 +7,8 @@
 
  The suite consists of several perl scripts, all of which should be set executable via chmod 700 or the like. It would be most useful to either put them in a directory discoverable via your shell's $path. The scripts were designed to be piped together via the Unix pipe command "|", so that a cohesive workflow can be executed at once. For a brief description of any script's usage and options, you may execute it alone with a sole -h option (help).
 
+<wiki:toc max_depth="2" />
+
 ----
  ==tread==
  {{{tread -col N [options] <file>}}}
@@ -97,7 +99,7 @@
 
 || option || function ||
 || {{{[delimiters]}}} || See [tab#tread] for delimiter specification options ||
-|| {{{-col N}}} || Write to column N of [output file] (required) ||
+|| {{{-col N}}} || Write to column N of {{{<output file>}}} (required) ||
 || {{{-start N}}} || Start writing from row N of source ||
 || {{{-end N}}} || End writing at row N of source ||
 || {{{-orig <parent file>}}} || The original file to insert the data into. If omitted, will simply read and write to the file specified by the last argument. ||

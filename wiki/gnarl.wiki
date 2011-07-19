@@ -43,19 +43,22 @@ Result: (new files created)
 file1_1.txt
 file2_2.txt
 file3_3.txt
-
-If, however, we wanted to combine all the .txt files in a given directory into one large txt file, the example is even more straightforward:
-
+}}}
+ 
+ If, however, we wanted to combine all the .txt files in a given directory into one large txt file, the example is even more straightforward:
+ 
+ {{{
 gnarl -dir /home/stuff/ -ext txt -op "cat %f>>bigfile.txt"
+}}}
 
-Gnarl can also read in an operation file containing a list of commands to apply to each file, as in this example where only the first five lines of each file are placed into final, master file.
-
-commands.ker:
+ Gnarl can also read in an operation file containing a list of commands to apply to each file, as in this example where only the first five lines of each file are placed into final, master file.
+ {{{
+commands.gnarl:
 head -n 5 %f > %f_temp.tmp
 cat "First five lines from %fp:\n"
 cat %f_temp.tmp>>master_file.txt
 rm %f_temp.tmp
 
-gnarl -dir /home/stuff/ -ext txt -opfile commands.ker
+gnarl -dir /home/stuff/ -ext txt -opfile commands.gnarl
 }}}
 

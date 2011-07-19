@@ -1,0 +1,3 @@
+#summary Documentation for tab programs
+
+This document is available in both [http://code.google.com/p/ihms-science/source/browse/doc/tab_readme.pdf PDF] and [http://code.google.com/p/ihms-science/source/browse/doc/tab_readme.rtf RTF] formats.

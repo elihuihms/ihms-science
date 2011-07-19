@@ -1,3 +1,61 @@
 #summary Documentation for gnarl program
 
-This document is available in both [http://ihms-science.googlecode.com/svn/doc/gnarl_readme.pdf PDF] and [http://ihms-science.googlecode.com/svn/doc/gnarl_readme.rtf RTF] formats.
+=Notes for Gnarl=
+
+ Gnarl is an application that can systematically perform a specified operation (such as running a script) or even multiple operations (such as terminal commands) on a set of files. This is very useful when the same actions need to be applied to a great number of files, or when data from a number of files needs to be combined.
+
+ ==Usage:==
+ {{{gnarl -dir <directory> -ext "extension" (-op "operation"|-opfile <file>) -start <integer> -log <log file>}}}
+
+ Upon execution, gnarl will compile a list of files within the specified -dir directory matching the given -ext extension. If -ext is not specified, Gnarl will match all readable files. Alternatively, a newline-delimited list of files may be piped to Gnarl, e.g. via ls -1.
+
+ Gnarl will then execute the specified operation on each file. Alternatively, if an operation file has been specified via -opfile, Gnarl will execute each line found within the file (in order) for each file. Operations can be constructed with the following wild-card characters, that will be appropriately filled in for each file:
+
+ %c will be replaced with Gnarl's internal counter (start point can be set with the -start option, otherwise will be 0 for the first matching file)
+
+ %fp will be replaced with the full file path, relative to the directory specified with -dir.
+
+ %f will be replaced with the file's full name (name + extension).
+
+ %fn is the file's "base name", the file's full name minus extension (e.g. when operating upon "myfile.txt" %fn = "myfile")
+
+ %fe is the opposite of %fn, as it is only the file's extension (eg. "txt")
+
+ Gnarl will keep a detailed log of each file operated upon, and the operations performed. This can be very useful for debugging purposes. If no log file is specified, a file name "gnarl_log.txt" will be created in the directory specified by -dir.
+
+==Examples:==
+ {{{
+Example directory structure:
+/home/stuff/
+/home/stuff/file1.txt
+/home/stuff/file2.txt
+/home/stuff/file3.txt
+/home/stuff/myfile.rtf
+
+If we wanted to create a set of files, each with only the first five lines of each .txt file in -dir, Gnarl would be run with the following options:
+
+gnarl -dir ~/stuff/ -ext txt -op "head -n 5 %f > %fn_%c.txt" -start 1
+or
+ls -1 ~/stuff/*txt | \
+gnarl -dir "~/stuff/" -op "head -n 5 %f > %fn_%c.txt" -start 1
+
+Result: (new files created)
+file1_1.txt
+file2_2.txt
+file3_3.txt
+
+If, however, we wanted to combine all the .txt files in a given directory into one large txt file, the example is even more straightforward:
+
+gnarl -dir /home/stuff/ -ext txt -op "cat %f>>bigfile.txt"
+
+Gnarl can also read in an operation file containing a list of commands to apply to each file, as in this example where only the first five lines of each file are placed into final, master file.
+
+commands.ker:
+head -n 5 %f > %f_temp.tmp
+cat "First five lines from %fp:\n"
+cat %f_temp.tmp>>master_file.txt
+rm %f_temp.tmp
+
+gnarl -dir /home/stuff/ -ext txt -opfile commands.ker
+}}}
+

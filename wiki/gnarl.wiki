@@ -1,3 +1,3 @@
 #summary Documentation for gnarl program
 
-This document is available in both [http://code.google.com/p/ihms-science/source/browse/doc/gnarl_readme.pdf PDF] and [http://code.google.com/p/ihms-science/source/browse/doc/gnarl_readme.rtf RTF] formats.
+This document is available in both [http://ihms-science.googlecode.com/svn/doc/gnarl_readme.pdf PDF] and [http://ihms-science.googlecode.com/svn/doc/gnarl_readme.rtf RTF] formats.

@@ -1,5 +1,5 @@
 #!/bin/sh
-# script takes a xy1y2 tab-delimited dataset and calculates the chi-squared difference between the  y1 and y2 columns
+# script takes a xy1y2 tab-delimited dataset and calculates the SSE difference between the  y1 and y2 columns
 
 # help
 if [ "$1" = "-h" ]

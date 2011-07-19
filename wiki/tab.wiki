@@ -13,12 +13,12 @@
  tread extracts a single column of data from a delimited ASCII file, which it then outputs to STDOUT. If no file is specified, will read from STDIN. Delimiters may be specified explicitly through the -delimiter option, or through the -whitespace or -comma delimiter options. If a delimiter is not specified, tread will default to strict tab-delimited behavior. The first column in a file is column 0, and similarly, the first line in a file is line 0. If the -start option is not specified, tread will start reading from the first line. Likewise, if the -end option is not specified, tread will read to the end of the file.
 
 || option || function ||
-|| {{{-col N}}} || Read column N of [file] (required) ||
+|| {{{-col N}}} || Read column N of {{{<file>}}} (required) ||
 || {{{-w}}} || Break on whitespace ||
 || {{{-comma}}} || Break on commas ||
 || {{{-delimiter "x"}}} || Break on delimiter "x" ||
-|| {{{-start N}}} || Start reading from row N of [file] ||
-|| {{{-end N}}} || End reading at row N of [file] ||
+|| {{{-start N}}} || Start reading from row N of {{{<file>}}} ||
+|| {{{-end N}}} || End reading at row N of {{{<file>}}} ||
 || {{{<file>}}} || File to read from (required) ||
 
 ----

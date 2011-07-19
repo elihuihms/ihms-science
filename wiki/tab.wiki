@@ -6,8 +6,9 @@
 
  The suite consists of several perl scripts, all of which should be set executable via chmod 700 or the like. It would be most useful to either put them in a directory discoverable via your shell's $path. The scripts were designed to be piped together via the Unix pipe command "|", so that a cohesive workflow can be executed at once. For a brief description of any script's usage and options, you may execute it alone with a sole -h option (help).
 
+----
  ==tread==
- {{{tread -col N [options] <file>}}
+ {{{tread -col N [options] <file>}}}
 
  tread extracts a single column of data from a delimited ASCII file, which it then outputs to STDOUT. If no file is specified, will read from STDIN. Delimiters may be specified explicitly through the -delimiter option, or through the -whitespace or -comma delimiter options. If a delimiter is not specified, tread will default to strict tab-delimited behavior. The first column in a file is column 0, and similarly, the first line in a file is line 0. If the -start option is not specified, tread will start reading from the first line. Likewise, if the -end option is not specified, tread will read to the end of the file.
 
@@ -20,6 +21,7 @@
 || {{{-end N}}} || End reading at row N of [file] ||
 || {{{<file>}}} || File to read from (required) ||
 
+----
 ==trex==
  {{{trex [delimiters] [options] [-title N] [-ext EXT]}}}
 
@@ -33,6 +35,7 @@
 || {{{-title N}}} || Instead of writing row files named by their row number, use the value in column N. ||
 || {{{-ext "extension"}}} || Use the specified file extension instead of ".tab" ||
 
+----
 ==tmath==
  {{{math -f [function]}}}
 
@@ -41,6 +44,7 @@
 || option || function ||
 || {{{[function] N}}} || Mathematical function to apply, where function is "add", "subtract", "multiply", "divide", "round", "power", "ln", "log", or "random". For "ln" and "log", no second argument is required. For "round", N is the number of digits past the decimal to round to. For "rand", N is the maximum random value possible. ||
 
+----
 ==tmunge==
  {{{tmunge -f [function] <operator_file>}}}
 
@@ -50,6 +54,7 @@
 || {{{[function]}}} || Mathematical function to apply. function can be "add", "subtract", "multiply", "divide", "chisq", or "logchisq". For the latter two functions, the chi-square or log chi-square difference between the passed value and the corresponding operator file value will be calculated. ||
 || {{{<operator_file>}}} || Operator file (a single column of data) to apply to the passed list. (Required) ||
 
+----
 ==tsmooth==
  {{{tsmooth [option]}}}
 
@@ -58,6 +63,7 @@
 || {{{-exp  N}}} || Exponential smoothing (N can range from 0 to 1, with 1 meaning no smoothing and 0 for maximal smoothing). ||
 || {{{-sg 5|7|9|11}}} || Savitsky-Golay smoothing, over 5, 7, 9, or 11 points. Internal quadratic values are taken from http://www.chem.uoa.gr/applets/appletsmooth/appl_smooth2.html. ||
 
+----
 ==tcalc==
  {{{tcalc [option]}}}
 
@@ -70,6 +76,7 @@
 || {{{-max}}} || Returns the maximum value ||
 || {{{-min}}} || Returns the minimum value ||
 
+----
 ==tsnort==
  {{{tsnort [option]}}}
 
@@ -140,6 +147,7 @@ tpad find and potentially fills gaps in columns of sequential (integer!) data va
 || {{{-fill}}} || Should missing column values be filled in? ||
 || {{{-down}}} || Values should be decreasing in order ||
 
+----
 ==Examples==
  {{{
 Assume the file "file1.dat", containing the following data:

@@ -1,3 +1,60 @@
 #summary Documentation for saxs programs
 
-This document is available in both [http://ihms-science.googlecode.com/svn/doc/saxs_readme.pdf PDF] and [http://ihms-science.googlecode.com/svn/doc/saxs_readme.rtf RTF] formats.
+=Notes for SAXS scripts=
+
+ These Perl scripts are to ease the analysis and display of SAXS data, semi-automating several time consuming components.
+
+ Note that  these scripts rely heavily upon the "tab" suite of utilities ('tread', 'tinsert', 'tscale', etc.), as well as the plotting package xmgrace. Both the tab directory and the xmgrace executable should be present in your shell environment's $path variable. For a brief description of any script's usage and options, you may execute it alone with a sole -h option (help).
+
+<wiki:toc max_depth="2" />
+
+----
+==saxsplot==
+ {{{saxsplot [options] <file_1.dat>...<file_n.dat> "output_name"}}}
+
+ saxsplot generates a standard scattering profile (i.e. log-scale) plot of one or more dat files, and saves it to the specified file. This is very useful for rapidly comparing multiple saxs scattering profiles. saxsplot assumes a tab-delimited data file, with the first column being q (2theta), and scattering intensity as the second column. Note that xmgrace will not tolerate any non-column data at the beginning of its input files. If you have comment headers at the top of any input files, xmgrace will fail with a "No block data read" error.
+
+|| option || function ||
+|| {{{-out [pdf|png|etc.]}}} ||Specifies xmgrace output format, availability of which will vary from installation to installation. Default is PostScript. ||
+|| {{{<input_n.dat>}}} || Input files to plot ||
+|| {{{-nxy <input.dat>}}} || Plot a multi-column (NXY) formated file ||
+|| {{{"output_name"}}} || Resulting output file, extension will be set automatically ||
+|| {{{-v}}} || Verbose mode, good for identifying any xmgrace errors ||
+
+----
+==gnom_rmax==
+ {{{gnom_rmax [options] -input <input.dat> }}}
+
+ gnom_rmax semiautomates the determination of Rmax values by generating several different plots. First is a comparison of back-calculated scattering profiles with the provided profile. A chi-square and log chi-square plots showing the goodness-of fit for the back-calculated scattering profiles to the provided  profile is also generated. Finally, an overlay of the different pairwise distribution or P(r) functions is plotted.
+
+ Note that at times, gnom may throw an error which will cause the execution of the script to halt. If this occurs, try a different set of starting parameters. Enabling verbose mode will assist in determining any gnom or xmgrace errors.
+
+|| option || function ||
+|| {{{-rmax start,end(,step)}}} || (Required) Specifies the desired starting and stopping values for the Rmax search range. If step is not specified, 10 steps total will be taken. ||
+|| {{{-input [file]}}} || (Required) Specifies the tab-delimited experimental scattering profile to work on. This file should consist of three columns:<br />1. q, 2theta, the scattering angle<br />2. I(q), the scattering intensity at q<br />3. dI(q), the intensity error<br />NOTE: if you are starting with data that DOES NOT have an error column, you must specify the error standard deviation with the -err option. ||
+|| {{{-nskip start,end}}} || Specifies the number of starting and trailing points to discard from the provided scattering profile. Defaults to zero for each. ||
+|| {{{-dir "dirname"}}} || The directory to save the plots to, defaults to "rmax" ||
+|| {{{-points N}}} || The number of points to use in the real dimension, defaults to 101 ||
+|| {{{-fix [min|max|both]}}} || Specifies whether P(r) should be constrained to zero at the boundary conditions. E.g. specifying "min" will require that P(0)=0, while max will require that P(Rmax)=0. Default is "both". ||
+|| {{{-err 0.0}}} || This parameter should ONLY be used if errors are not present in the provided scattering profile. If errors are not known, set to zero. ||
+|| {{{-keep}}} || Determines whether or not the individual scattering profile and pairwise distribution curves for each Rmax evaluation should be retained. ||
+|| {{{-out [pdf|png|etc.]}}} || Specifies xmgrace output format, availability of which will vary from installation to installation. Default is PostScript. ||
+|| {{{-v}}} || Verbose mode ||
+
+----
+==damn==
+ {{{damn [options]}}}
+
+ damn automatically generates a series of dammin runs, spawning a new process as old ones finish or as processor cores become available. It will also optionally generate the final averaged envelope if desired.
+
+|| option || function ||
+|| {{{-ans}}} || Specifies the input parameters file piped to dammin. damn will automatically replace any occurrences of the string "<N>" in this template file with the current run number before sending to dammin. Defaults to "parameters.txt" ||
+|| {{{-n N}}} || Specifies the total number of annealings to perform. Defaults to 10. ||
+|| {{{-start N}}} || Specifies which run to start at, useful for restarting  a crashed attempt. Defaults to 9 ||
+|| {{{-cores N}}} || Specifies how many dammin processes to run at once. Modern multicored systems will typically allot a dammin process to each core at 100% utilization. It is advisable to set this number to 1 less than the total number of cores, as this will avoid any responsiveness issues. ||
+|| {{{-exe procname}}} || Specifies the annealing program name to run. Defaults to "dammin". ||
+|| {{{-avg}}} || Setting this option will cause damn to average (via damsel, damsup, etc.) the generated individual envelopes after execution. ||
+|| {{{-nodie}}} || Including this flag will result in damn staying open until the last child process exits. Useful for systems that kill unowned child processes. ||
+|| {{{-v}}} || Verbose mode ||
+
+

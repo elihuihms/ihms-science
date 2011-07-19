@@ -1,5 +1,4 @@
 #summary Documentation for tab programs
-#sidebar TableOfContents
 
 =Documentation for "tab" suite of utilities=
 

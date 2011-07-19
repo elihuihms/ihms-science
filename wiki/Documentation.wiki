@@ -95,7 +95,7 @@
  ==Description:==
  Extracts a single xyz-formatted structure file from a [http://www.psicode.org/ Psi3] output file. This is useful for verifying structure in a molecular viewer that doesn't understand connection matrices.
  ==Usage:==
-  {{{pdb2xyz output.dat > output.xyz
+  {{{pdb2xyz output.dat > output.xyz}}}
  ==See also:==
  [Documentation#psiopt2xyz psiopt2xyz]
 
@@ -103,7 +103,7 @@
 
 =psiopt2xyz=
  ==Description:==
- Similar to [Documentation#gextract], extracts molecular structure information (in an xyz format) for each step in a [http://www.psicode.org/ Psi3] structure optimization run. 
+ Similar to [Documentation#gextract gextract], extracts molecular structure information (in an xyz format) for each step in a [http://www.psicode.org/ Psi3] structure optimization run. 
  ==Usage:==
   {{{psiopt2xyz (-last) output.dat}}}
 || option || function ||

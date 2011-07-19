@@ -1,4 +1,5 @@
 #summary Documentation for tab programs
+#sidebar TableOfContents
 
 =Documentation for "tab" suite of utilities=
 
@@ -23,7 +24,7 @@
 
 ----
 ==trex==
- {{{trex [delimiters] [options] [-title N] [-ext EXT]}}}
+ {{{trex [delimiters] [options]}}}
 
  trex extracts every row in a passed dataset  (following identical delimiter rules as tread) to their own files. Delimiter identity is retained in the extraction process. Columns can be specified by the -start or -end options, or explicitly specified for extraction (and possible reordering) via the -cols command. Issuing trex with the option -cols 3,0,1 would extract only the specified columns and write them in the resulting file as column3 (delimiter) column0 (delimiter) column1 (newline) . By default, the resulting row files are named after their row number in the parent file. The -title option, however, enables the user to change the resulting row name to the value in the row specified. Note that rows with identical values in that column will be overwritten. Finally, the -ext option allows for the specification of the resulting row file extension.
 
@@ -56,7 +57,7 @@
 
 ----
 ==tsmooth==
- {{{tsmooth [option]}}}
+ {{{tsmooth [options]}}}
 
 || option || function ||
 || {{{-mean N}}} || A running mean smoothing over N points. ||
@@ -65,7 +66,7 @@
 
 ----
 ==tcalc==
- {{{tcalc [option]}}}
+ {{{tcalc [options]}}}
 
  tcalc calculates a single value from a passed column of data. 
 
@@ -78,7 +79,7 @@
 
 ----
 ==tsnort==
- {{{tsnort [option]}}}
+ {{{tsnort [options]}}}
 
  tsnort numerically sorts a column of data in the user-specified direction (if a direction is not specified, it is sorted in an ascending manner). Alternatively, an external single-column file with an identical number of rows of data as the passed column can be used to determine the sort order of the passed column. tsnort is so named to not conflict with the gcc "tsort" topological sort utility.
 
@@ -90,13 +91,13 @@
 
 ----
 ==twrite==
- {{{twrite -col N [delimiters] [options] (parent file)}}}
+ {{{twrite -col N [delimiters] [options] <parent file>}}}
 
  twrite replaces a column of data in a file with the piped column of data. If the column does not exist, the file will be padded with tabs until the specified column number is met. Note that data cannot extend past the last row of the destination file. If the original file is specified with the -orig flag, the file itself will not be modified, but the resulting text will be sent to stdout (unless the output file is specified with the -out option).
 
 || option || function ||
 || {{{[delimiters]}}} || See [tab#tread] for delimiter specification options ||
-|| {{{-col N}}} || Write to column N of [output file] (required)
+|| {{{-col N}}} || Write to column N of [output file] (required) ||
 || {{{-start N}}} || Start writing from row N of source ||
 || {{{-end N}}} || End writing at row N of source ||
 || {{{-orig <parent file>}}} || The original file to insert the data into. If omitted, will simply read and write to the file specified by the last argument. ||
@@ -105,7 +106,7 @@
 
 ----
 ==texchange==
- {{{texchange ([delimiters] <file>)}}}
+ {{{texchange [delimiters] <file>}}}
 
  texchange inverts a file containing rows and columns of data by exchanging rows for columns and visa versa. For example, if you had a file with 40 rows and 3 columns, texchange will convert that to a file with 3 rows and 40 columns. Note that although it can understand a wide number of delimiters (just like tread), it will always output tab-delimited data
 

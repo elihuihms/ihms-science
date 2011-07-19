@@ -48,11 +48,11 @@
  damn automatically generates a series of dammin runs, spawning a new process as old ones finish or as processor cores become available. It will also optionally generate the final averaged envelope if desired.
 
 || option || function ||
-|| {{{-ans}}} || Specifies the input parameters file piped to dammin. damn will automatically replace any occurrences of the string "<N>" in this template file with the current run number before sending to dammin. Defaults to "parameters.txt" ||
+|| {{{-ans}}} || Specifies the input parameters file piped to dammin. damn will automatically replace any occurrences of the string "{{{<N>}}}" in this template file with the current run number before sending to dammin. Defaults to "parameters.txt" ||
 || {{{-n N}}} || Specifies the total number of annealings to perform. Defaults to 10. ||
 || {{{-start N}}} || Specifies which run to start at, useful for restarting  a crashed attempt. Defaults to 9 ||
 || {{{-cores N}}} || Specifies how many dammin processes to run at once. Modern multicored systems will typically allot a dammin process to each core at 100% utilization. It is advisable to set this number to 1 less than the total number of cores, as this will avoid any responsiveness issues. ||
-|| {{{-exe procname}}} || Specifies the annealing program name to run. Defaults to "dammin". ||
+|| {{{-exe "procname"}}} || Specifies the annealing program name to run. Defaults to "dammin". ||
 || {{{-avg}}} || Setting this option will cause damn to average (via damsel, damsup, etc.) the generated individual envelopes after execution. ||
 || {{{-nodie}}} || Including this flag will result in damn staying open until the last child process exits. Useful for systems that kill unowned child processes. ||
 || {{{-v}}} || Verbose mode ||

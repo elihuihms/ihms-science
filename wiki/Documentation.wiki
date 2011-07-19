@@ -1,6 +1,10 @@
 #summary Documentation for some of the individual utilities.
 
 =Documentation for the following programs:=
+ * [tab] - separate page
+ * [saxs] - separate page
+ * [gnarl] - separate page
+
  * [Documentation#chisq_col chisq_col]
  * [Documentation#comma2tab comma2tab]
  * [Documentation#gextract gextract]

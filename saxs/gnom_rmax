@@ -32,7 +32,7 @@ $input_errors		= "";
 # constants
 $gnom_exec			= "gnom";
 $gnom_config		= "gnom.ans";
-$gnom_out			= "gnom_out.tmp";
+$gnom_out			= "gnom.out";
 $output_folder		= "rmax";
 $outputpipe			= " >/dev/null 2>&1";
 
@@ -225,6 +225,12 @@ for ($rmax=$rmax_low; $rmax<=$rmax_high; $rmax+=$rmax_step)
 	# save the results of gnom_scrape
 	system("mv gnom_i.dat $output_folder/gnom_".$rmax."_i.dat");
 	system("mv gnom_p.dat $output_folder/gnom_".$rmax."_p.dat");
+	
+	# archive the gnom out if asked
+	if($keep_dats eq 'true'){
+		$gnom_out_new = $output_folder.'/'.$rmax.'_'.$gnom_out;
+		`mv "$gnom_out" "$gnom_out_new"`;
+	}
 }
 close RESULTS;
 
@@ -261,6 +267,12 @@ $s4.= " -settype xy -block $output_folder/$results_file -bxy 1:10 $ticks";
 $s5 = "xmgrace -autoscale xy -p izero.par -pexec 'subtitle \"$subtitle\"'";
 $s5.= " -settype xy -block $output_folder/$results_file -bxy 1:11 $ticks";
 
+# append original intensity data
+$s2.= " -block '$input1' -bxy 1:2 ";
+$s2.= " -pexec 's0 legend \"Experimental\"' ";
+$s2.= " -pexec 's0 line linestyle 2' ";
+$s2.= " -pexec 's0 line linewidth 2.0' ";
+
 $i = 0;
 for ($rmax=$rmax_low; $rmax<=$rmax_high; $rmax+=$rmax_step)
 {
@@ -268,12 +280,9 @@ for ($rmax=$rmax_low; $rmax<=$rmax_high; $rmax+=$rmax_step)
 	$s1.= " -pexec 's".$i." legend \"$rmax \\cE\\C\"' ";
 	
 	$s2.= " -block $output_folder/gnom_".$rmax."_i.dat -bxy 1:3 ";
-	$s2.= " -pexec 's".$i." legend \"$rmax \\cE\\C\"' ";
+	$s2.= " -pexec 's".($i+1)." legend \"$rmax \\cE\\C\"' ";
 	$i++;
 }
-
-# append original intensity data
-$s2.= " -block $output_folder/gnom_".$rmax."_i.dat -bxy 1:2 -pexec 's".$i." legend \"Experimental\"' ";
 
 if ($agr_output eq 'true'){
 	$s1.= " -saveall $output_folder/pairwise.agr";
@@ -299,7 +308,7 @@ $s5.= " -hardcopy -hdevice $output_type -printfile $output_folder/izero.$output_
 print "Done.\n";
 
 # clean up
-`rm $gnom_out`;
+if($keep_dats ne 'true'){ `rm $gnom_out`; }
 `rm $gnom_config`;
 `rm kern.bin`;
 `rm pairwise.par`;
@@ -308,14 +317,9 @@ print "Done.\n";
 `rm rg.par`;
 `rm izero.par`;
 
-# remove the gnom_scrape outputs now that we're done
-if($keep_dats ne 'true')
-{
-	for ($rmax=$rmax_low; $rmax<=$rmax_high; $rmax+=$rmax_step)
-	{
-		system("rm $output_folder/gnom_".$rmax."_i.dat");
-		system("rm $output_folder/gnom_".$rmax."_p.dat");
-	}
+for ($rmax=$rmax_low; $rmax<=$rmax_high; $rmax+=$rmax_step){
+	system("rm $output_folder/gnom_".$rmax."_i.dat");
+	system("rm $output_folder/gnom_".$rmax."_p.dat");
 }
 
 sub write_input

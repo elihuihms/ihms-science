@@ -97,7 +97,7 @@ elsif ($method eq "minimum"){
 	print $min."\n";
 }
 elsif ($method eq "count"){
-	print $#data."\n";
+	print ($#data +1)."\n";
 }
 
 

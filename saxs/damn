@@ -98,7 +98,7 @@ while($input_counter < $num_runs)
 			die("Could not load job configuration file '$input_counter.ans'");
 		}
 	
-		print "Spawning a new dammin process, ID# $input_counter.\n";
+		print "Spawning a new '$damn_exe' process, ID# $input_counter.\n";
 		`$damn_exe < $input_counter.ans $outputpipe`;
 
 		$input_counter++;

@@ -103,6 +103,6 @@ elsif ($method eq "count"){
 
 sub show_help
 {
-	print "tcalc -stddev|-avg|-sum|-max|-min\n";
+	print "tcalc -stddev|-avg|-sum|-max|-min|-count\n";
 	exit;
 }

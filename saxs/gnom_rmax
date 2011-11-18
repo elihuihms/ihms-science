@@ -192,19 +192,24 @@ for ($rmax=$rmax_low; $rmax<=$rmax_high; $rmax+=$rmax_step)
 	open CHISQ, "gnom_i.dat" or die "Can't open gnom_i.dat: $!\n";
 	$chisq_sum = 0;
 	$chisq_ln_sum = 0;
+	
+	$i = 0;
 	while(<CHISQ>){
 		@a = split("\t");
 		if (($a[1]>0) && ($a[2]>0) && ($a[3]>0)){
-			$chisq_sum += (($a[1]-$a[2])**2)/$a[3];
+			$chisq_sum += (($a[1]-$a[2])/$a[3])**2;
+			$i++;
 		}
 	}
 	close(CHISQ);
 	
-	if ($chisq_sum < $chisq_min){
-		$chisq_min = $chisq_sum;
+	$chisq = $chisq_sum / ($i -1);
+	
+	if ($chisq < $chisq_min){
+		$chisq_min = $chisq;
 	}
-	if ($chisq_sum > $chisq_max){
-		$chisq_max = $chisq_sum;
+	if ($chisq > $chisq_max){
+		$chisq_max = $chisq;
 	}
 	
 	# normalize P(r)
@@ -220,7 +225,7 @@ for ($rmax=$rmax_low; $rmax<=$rmax_high; $rmax+=$rmax_step)
 	}
 	`tread -col 1 gnom_p.dat | tmath -f divide $scaling_factor | twrite -col 1 gnom_p.dat`;
 	
-	print RESULTS "$values\t$total_estimate\t$chisq_sum\t$rg\t$izero\n";
+	print RESULTS "$values\t$total_estimate\t$chisq\t$rg\t$izero\n";
 	
 	# save the results of gnom_scrape
 	system("mv gnom_i.dat $output_folder/gnom_".$rmax."_i.dat");

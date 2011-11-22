@@ -37,7 +37,7 @@
 || {{{-points N}}} || The number of points to use in the real dimension, defaults to 101 ||
 || {{{-fix [min|max|both]}}} || Specifies whether P(r) should be constrained to zero at the boundary conditions. E.g. specifying "min" will require that P(0)=0, while max will require that P(Rmax)=0. Default is "both". ||
 || {{{-err 0.0}}} || This parameter should ONLY be used if errors are not present in the provided scattering profile. If errors are not known, set to zero. ||
-|| {{{-keep}}} || Determines whether or not the individual scattering profile and pairwise distribution curves for each Rmax evaluation should be retained. ||
+|| {{{-keep}}} || Enabling this option will save the gnom.out files for each Rmax evaluation. ||
 || {{{-out [pdf|png|etc.]}}} || Specifies xmgrace output format, availability of which will vary from installation to installation. Default is PostScript. ||
 || {{{-v}}} || Verbose mode ||
 

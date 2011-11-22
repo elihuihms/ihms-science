@@ -7,11 +7,13 @@
 # 01.27.2010	added help
 # 07.30.2010	changed how tread outputs empty columns
 # 04.02.2010	added input from stdin
-$version='04.02.2010';
+# 11.22.2011	fixed stdin behavior
+$version='11.22.2011';
 
 # default values
 $argcounter			= 0;
 $source_file		= "false";
+$pipe				= 'false';
 $column				= 0;
 $start				= 0;
 $end				= "false";
@@ -24,6 +26,10 @@ while ( $argcounter <= $#ARGV )
 	{
 		$source_file = $ARGV[ $argcounter +1 ];
 		$argcounter++;
+	}
+	if ( $ARGV[ $argcounter ] eq "-pipe" )
+	{
+		$pipe = 'true';
 	}
 	elsif ( $ARGV[ $argcounter ] eq "-col" )
 	{
@@ -75,7 +81,7 @@ if (-e $ARGV[$#ARGV]){
 	open(SRCFILE, $source_file) || die "Can't open $source_file: $!\n";
 	@file_data = <SRCFILE>;
 	close(SRCFILE);
-}elsif (-t STDIN){
+}elsif ($pipe eq 'true'){
 	@file_data = <STDIN>;
 }else{
 	die "Invalid input file specified.\n"

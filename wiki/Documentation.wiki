@@ -17,7 +17,7 @@
  * [Documentation#tab2comma tab2comma]
 
 =Notes=
- * Please see the [tab], [saxs], and [gnarl] pages for documentation on those packages.
+ * Please see the [tab], [saxs], and [gnarl] pages for documentation on those applications.
  * Most programs and scripts contain built-in help. If run without arguments, or the -h argument, e.g. {{{itcparse -h}}}, a brief help should be provided
  * All of these programs are designed and verified to work with most linux distros and Macintosh OS X versions. Many use perl, and/or have dependencies on the [tab] package. Please see the "requirements" section for each program.
 

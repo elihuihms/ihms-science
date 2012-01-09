@@ -10,7 +10,9 @@
 # 04.21.2011	EI	changed "chisq" plot to true chi-sq instead of SSE, no longer generates log difference either
 # 05.02.2011	EI	added -agr option, rg and I(0) plots
 # 05.04.2011	EI	using real-space Rg values
-$version='05.04.2011';
+# 11.29.2011	EI	added annotations to output file
+
+$version='11.29.2011';
 
 # default values
 $argcounter			= 0;
@@ -143,6 +145,7 @@ if (-e $output_folder){
 
 # open output file for writing progress
 open RESULTS, ">$results_file" or die "Can't open file $results_file: $!\n";
+print RESULTS "#Rmax\tDISCRP\tOSCILL\tSTABIL\tSYSDEV\tPOSITV\tVALCEN\tTotal estimate\tChisq\tRg\tI(0)\n";
 
 # the big show
 $chisq_max = 0;

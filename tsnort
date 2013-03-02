@@ -5,7 +5,7 @@
 # Changelog:
 # 05.26.2010	written
 # 04.26.11		EI	changed -op to -by, added version
-$version='04.26.11';
+$version='08.03.12';
 
 # default values
 $argcounter			= 0;
@@ -18,7 +18,13 @@ while ( $argcounter <= $#ARGV )
 	if( $ARGV[ $argcounter ] eq "-desc" ){
 		$direction = "descending";
 	}
+	elsif( $ARGV[ $argcounter ] eq "-d" ){
+		$direction = "descending";
+	}
 	elsif( $ARGV[ $argcounter ] eq "-rev" ){
+		$direction = "reverse";
+	}
+	elsif( $ARGV[ $argcounter ] eq "-r" ){
 		$direction = "reverse";
 	}
 	elsif ( $ARGV[ $argcounter ] eq "-by" )
@@ -27,6 +33,10 @@ while ( $argcounter <= $#ARGV )
 		$argcounter++;
 	}
 	elsif ($ARGV[ $argcounter ] eq "-version"){
+		print $version."\n";
+		exit;
+	}
+	elsif ($ARGV[ $argcounter ] eq "-v"){
 		print $version."\n";
 		exit;
 	}
@@ -69,19 +79,25 @@ if ($operator_file ne "false")
 		die "Source data and operator file must have equal # of rows.\n";
 	}
 	
-	# initialize reference hash
-	$i = 0;
-	$ref_hash = {};
-	foreach(@operator_file_data){
-		$ref_hash{$_} = $source_data[$i];
-		$i++;
-	}
-	
-	@final_data = ();
-	# from http://www.tizag.com/perlT/perlhashes.php
-	foreach $key (sort {$a <=> $b} keys %ref_hash){
-		push(@final_data,$ref_hash{$key});
-	}
+#	# initialize reference hash
+#	$i = 0;
+#	$ref_hash = {};
+#	foreach(@operator_file_data){
+#		$ref_hash{$_} = $source_data[$i];
+#		$i++;
+#	}
+#	
+#	@final_data = ();
+#	# from http://www.tizag.com/perlT/perlhashes.php
+#	foreach $key (sort {$a <=> $b} keys %ref_hash){
+#		push(@final_data,$ref_hash{$key});
+#	}
+
+#	# from http://www.tek-tips.com/viewthread.cfm?qid=52504
+	@final_data =
+	map  {$_->[0]} (
+	sort {$a->[1] <=> $b->[1]} (
+	map {[$_, shift(@operator_file_data)]} @source_data));
 	
 	# reverse direction if we're supposed to
 	if ($direction eq "descending"){
@@ -107,6 +123,6 @@ print STDOUT $output_data;
 
 sub show_help
 {
-	print "tsort -asc|-desc|-rev (-op [file])\n";
+	print "tsort -asc|-desc|-rev (-by [file])\n";
 	exit;
 }

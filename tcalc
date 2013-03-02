@@ -7,7 +7,8 @@
 # 05.18.2010	added pipe checking
 # 05.26.2010	added min/max methods
 # 04.25.2011	added count, version
-$version = '04.25.11';
+# 09.05.2012	fixed -avg calculation
+$version = '09.04.12';
 
 $method = "none";
 
@@ -72,7 +73,12 @@ foreach(@data)
 		$min = $_;
 	}
 }
-$avg = $sum / $#data;
+if( $#data > 0 )
+{
+	$avg = $sum / ($#data +1);
+}else{
+	$avg = $data[0];
+}
 
 # output requested value
 if ($method eq "stddev")

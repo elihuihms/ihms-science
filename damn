@@ -10,7 +10,8 @@
 # 04.25.2011	EI	fixed proc spawning
 # 04.28.2011	EI	fixed batch averaging
 # 05.27.2011	EI	added nodie option, proc detection (again!)
-$version='05.27.11';
+# 01.09.2012	EI	fixed multiple <N> detections in input script, increased proc check rate, added -out options
+$version='01.09.12';
 
 # default values
 $argcounter		= 0;
@@ -24,7 +25,7 @@ $outputpipe		= " >/dev/null 2>&1 &";
 $nodie			= 'false';
 
 # constants
-$sleep_interval = 10; #seconds
+$sleep_interval = 3; #seconds
 
 #go through the arguments and get their values
 while ( $argcounter <= $#ARGV )
@@ -37,6 +38,11 @@ while ( $argcounter <= $#ARGV )
 	elsif ( $ARGV[ $argcounter ] eq "-exe" )
 	{
 		$damn_exe = $ARGV[ $argcounter +1 ];
+		$argcounter++;
+	}
+	elsif ( $ARGV[ $argcounter ] eq "-out" )
+	{
+		$outputpipe = $ARGV[ $argcounter +1 ];
 		$argcounter++;
 	}
 	elsif ( $ARGV[ $argcounter ] eq "-ans" )
@@ -92,8 +98,8 @@ $input_counter = $num_start;
 while($input_counter < $num_runs)
 {
 	# spawn a new process if we have a free core 
-	if (count_procs($damn_exe)<$num_procs){
-	
+	if (count_procs($damn_exe)<$num_procs)
+	{
 		if (! -e "$input_counter.ans"){
 			die("Could not load job configuration file '$input_counter.ans'");
 		}
@@ -165,7 +171,7 @@ sub write_inputs
 	for($i=$start;$i<$stop;$i++)
 	{
 		$copy = $file;
-		$copy =~ s/\<N\>/$i/;
+		$copy =~ s/\<N\>/$i/g;
 
 		open(OUTPUT, ">$i.ans") or die("Can't open '$i.ans' for writing: $!");
 		print OUTPUT $copy;
@@ -176,6 +182,6 @@ sub write_inputs
 
 sub show_help
 {
-	print "damn -ans <dammin.ans> (-n=10) (-start=N) (-cores=1) -exe (dammin)\n";
+	print "damn -ans <dammin.ans> (-n=10) (-start=N) (-cores=1) -exe (dammin) -out <out> \n";
 	exit;
 }
